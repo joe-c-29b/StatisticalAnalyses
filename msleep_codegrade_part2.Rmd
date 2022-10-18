@@ -1,0 +1,110 @@
+---
+title: "NYCflights"
+author: "Joseph Christian"
+date: '2022-10-07'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+```{r}
+##installations
+install.packages("tidyverse")
+install.packages("lm.beta")
+```
+```{r}
+#library
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(lm.beta))
+```
+```{r}
+data("msleep")
+summary(msleep)
+```
+
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+##question 1
+```{r}
+##Run cor.test for the relationship between total sleep and body weight.  You should not round these values.
+
+Q1 <- cor.test(msleep$sleep_total, msleep$bodywt)
+
+Q1
+```
+
+##question 2
+```{r}
+##Create a correlation matrix for the relations among total sleep, rem sleep, brain weight, and body weight.  Make sure to remove missing values.
+Q2 <- select(msleep, sleep_total, sleep_rem, brainwt, bodywt) %>%
+  na.omit() %>%
+  cor() %>%
+  round(digits = 2)
+Q2
+
+```
+
+##question 3
+```{r}
+##Run a regression predicting body weight by vore. 
+sleepModel <- lm(bodywt ~ vore, data = msleep)
+Q3 <- round(sleepModel$coefficients, digits = 2)
+Q3
+```
+
+##question 4
+```{r}
+##Create a regression predicting bodywt by vore and REM sleep.  Compared to the model in Q3, which one has the better AIC?
+sleepModel2 <- lm(msleep$bodywt ~ msleep$vore + msleep$sleep_rem, data = msleep)
+
+AICmod1 <- AIC(sleepModel, k = 1)
+AICmod2 <- AIC(sleepModel2, k = 2)
+print(AICmod1)
+print(AICmod2)
+Q4 <- AICmod2
+Q4
+```
+
+
+##question 5
+```{r}
+##Create a logistic regression predicting whether or not an animal is a carnivore or herbivore based on sleep total.  Assign the model to Q5.
+
+voreSleep <- msleep %>%
+  select(vore, sleep_total) %>%
+  filter(vore != "omni" & vore != "insecti") %>%
+  mutate(vorebin = ifelse(vore == 'carni', 0, 1))
+voreSleep
+voreSleepMod <- glm(vorebin ~ sleep_total, binomial(), data = voreSleep)
+Q5 <- voreSleepMod
+Q5
+
+```
+
+?index
+
+
+
+  

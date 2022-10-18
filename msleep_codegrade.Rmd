@@ -1,0 +1,106 @@
+---
+title: "msleep_codegrade"
+author: "Joseph Christian"
+date: "2022-09-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## library
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+
+```
+##load data
+```{r}
+data(msleep)
+```
+
+## instructions and beginning notes
+```{r}
+getwd()
+describe(msleep)
+msleep
+
+
+
+#rewatch dr longo video on pizza practice before turning in really rewatch all the submission videos
+```
+## Question 1: What is the variance in total sleep for carni vores and those whose conservation status is lc? 
+```{r}
+Q1 <- msleep %>%
+  filter(vore == 'carni' & conservation == 'lc') %>%
+  summarise(var = var(sleep_total, na.rm = 'TRUE'), .groups = 'drop') %>%
+  as.data.frame() %>%
+  round(digits = 2)
+Q1
+```
+  
+## Q2 What rodent (order Rodentia) has the highest total sleep/rem sleep ratio?  
+```{r}
+Q2 <- msleep %>%
+  filter(order == 'Rodentia') %>%
+  mutate(sleep_ratio = sleep_total / sleep_rem, na.rm = TRUE) %>%
+  arrange(desc(sleep_ratio)) %>%
+  select(name) %>%
+  head(1)
+Q2
+```
+
+## Q3 How many primates have a bodyweight/brainwt ratio greater than 100?
+```{r}
+Q3 <- msleep %>%
+  filter(order == 'Primates') %>%
+  mutate(weight_ratio = bodywt / brainwt, na.rm = TRUE) %>%
+  filter(weight_ratio > 100) %>%
+  nrow()
+Q3
+
+```
+
+## Q4 Create two new variables, the mean of sleep total and variance of sleep total, grouped by conservation, and removing missing values.  The names of the variables should correspond to those in the example below.
+```{r}
+Q4 <- msleep %>%
+  group_by(conservation) %>%
+  summarise(mean_sleep = mean(sleep_total, na.rm = TRUE), 
+    var_sleep = var(sleep_total, na.rm = TRUE),
+    .groups = 'drop') %>%
+  head()
+
+Q4
+```
+
+## Q5 Provide the name(s) of all the domesticated herbivores that sleep more than 12 hours.
+```{r}
+Q5 <- msleep %>%
+  filter(conservation == 'domesticated' & vore == 'herbi' & sleep_total > 12) %>%
+  select(name)
+
+Q5
+```
+
+
+

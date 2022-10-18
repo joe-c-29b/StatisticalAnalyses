@@ -1,0 +1,119 @@
+---
+title: "pizza_codegrade"
+author: "Joseph Christian"
+date: "2022-09-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## library
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(psych))
+install.packages('psych')
+```
+##load data
+```{r}
+pizza <- suppressMessages(read_csv('pizza.csv'))
+```
+
+
+## instructions and beginning notes
+```{r}
+getwd()
+describe(pizza)
+pizza
+
+
+
+#rewatch dr longo video on pizza practice before turning in really rewatch all the submission videos
+```
+## Question 1: need driver names, free_wine=1, discount_customer=1, >4 pizzas
+```{r}
+Q1 <- pizza %>%
+  filter(free_wine == 1 & discount_customer == 1 & pizzas > 4) %>%
+  select(driver) 
+Q1
+```
+  
+## Q2
+```{r}
+Q2 <- pizza %>%
+  summarise(mean_ratio = mean(bill / pizzas, na.rm = TRUE), .groups = 'drop')
+Q2
+```
+
+## Q3
+```{r}
+Q3 <- pizza %>%
+  group_by(day) %>%
+  summarise(var_pizzas = var(pizzas), .groups = 'drop')
+
+```
+
+## Q4
+```{r}
+Q4 <- pizza %>%
+  group_by(operator) %>%
+  summarise(mean_bill = mean(bill), .groups = 'drop') %>%
+  arrange(desc(mean_bill)) %>%
+  select(operator) %>%
+  head(1)
+```
+
+## Q5
+```{r}
+Q5 <- pizza %>%
+  group_by(day, driver) %>%
+  summarise(n = sum(free_wine), .groups = 'drop')%>%
+  arrange(desc(n)) %>%
+  select(day, driver, n) %>%
+  head(1)
+
+```
+
+```{r}
+Q6 <- pizza %>%
+  mutate(mean_ratio = mean(bill / pizzas, na.rm = TRUE)) %>%
+  head(1) %>%
+  select(mean_ratio)
+Q6
+
+```
+
+```{r}
+Q6 <- pizza %>%
+  summarise(mean(pizzas, na.rm = TRUE), .groups = 'drop')
+Q6 
+```
+
+
+
+
+
+
+
+

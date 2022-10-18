@@ -1,0 +1,114 @@
+---
+title: "fastfood_codegrade"
+author: "Joseph Christian"
+date: "2022-09-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## library
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(openintro))
+suppressPackageStartupMessages(library(lm.beta))
+suppressPackageStartupMessages(library(Hmisc))
+install.packages('openintro')
+install.packages('Hmisc')
+```
+##load data
+```{r}
+fastfood <- openintro::fastfood
+```
+
+## instructions and beginning notes
+```{r}
+getwd()
+describe(fastfood)
+fastfood
+summary(fastfood)
+
+
+
+#rewatch dr longo video on pizza practice before turning in really rewatch all the submission videos
+```
+## Question 1: Create a correlation matrix for the relations between calories, total_fat, sugar, and calcium for all items at Sonic, Subway, and Taco Bell, omitting missing values with na.omit().  
+```{r}
+Q1 <- fastfood %>%
+  filter(restaurant == 'Sonic' | restaurant == 'Subway' | restaurant == 'Taco Bell') %>%
+  select(calories, total_fat, sugar, calcium) %>%
+  na.omit() %>%
+  cor()
+  round(digits = 2)
+```
+  
+## Q2 Create a regression predicting whether or not a restaurant is McDonalds or Subway based on calories, sodium, and protein.  (McDonalds should be 1, Subway 0).
+```{r}
+SMreg <- fastfood %>%
+  filter(restaurant == 'Mcdonalds' | restaurant == 'Subway')%>%
+  select(restaurant, calories, sodium, protein) %>%
+  mutate(restbin = ifelse(restaurant == 'Mcdonalds', 1, 0))
+SMregModel <- glm(restbin ~ calories + sodium + protein, binomial(), data = SMreg)
+Q2 <- SMregModel$coefficients %>% round(digits = 2)
+Q2
+```
+
+## Q3 Run the same regression as in #2 but remove sodium as a predictor. 
+```{r}
+SMregModel2 <- glm(restbin ~ calories + protein, data = SMreg)
+SMregModel2
+Q3 <- AIC(SMregModel, k=2) %>% round(digits = 2)
+Q3
+```
+
+## Q4 Run a regression predicting calories from saturated fat, fiber, and sugar.  Based on standardized regression coefficients, identify the strongest predictor.  
+```{r}
+calModel <- lm(calories ~ sat_fat + fiber + sugar, data = fastfood)
+lm.beta(calModel)
+Q4 <- calModel$coefficients [2] %>%
+  round(digits = 2)
+Q4
+```
+
+## Q5 For this question, use data from only restaurants with between 50 and 60 items in the data set.  Predict total fat from cholesterol, total carbs, vitamin a, and restaurant.  Remove any nonsignificant predictors and run again. 
+```{r}
+table(fastfood$restaurant)
+
+fiftyPlus <- fastfood %>%
+  filter(restaurant == 'Arbys' | restaurant == 'Mcdonalds' | restaurant == 'Sonic') %>%
+  select(total_fat, cholesterol, total_carb, vit_a, restaurant) 
+fiftyPlus
+
+TotFat <- lm(total_fat ~ cholesterol + total_carb + vit_a + restaurant, data = fiftyPlus)
+summary(TotFat)
+TotFat2 <- lm(total_fat ~ cholesterol + total_carb + restaurant, data = fiftyPlus)
+Tots <- lm.beta(TotFat2)
+Q5 <- Tots$standardized.coefficients [2] %>% round(digits = 2)
+Q5
+
+
+
+
+```

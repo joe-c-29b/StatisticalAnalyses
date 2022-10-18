@@ -1,0 +1,109 @@
+---
+title: "flights_codegrade"
+author: "Joseph Christian"
+date: "2022-09-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## library
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(nycflights13))
+```
+##load data
+```{r}
+data(flights)
+```
+
+## instructions and beginning notes
+```{r}
+getwd()
+describe(msleep)
+flights
+
+
+
+#rewatch dr longo video on pizza practice before turning in really rewatch all the submission videos
+```
+## Question 1: What is the mean distance of flights for each of the carriers AA, EV, and FL?
+```{r}
+Q1 <- flights %>%
+  group_by(carrier) %>%
+  filter(carrier == 'AA' | carrier == 'EV' | carrier == 'FL') %>%
+  summarise(mean_dist = mean(distance, na.rm = 'TRUE'), .groups = 'drop') %>%
+  as.data.frame() %>%
+  mutate_if(is.numeric, round, digits = 2)
+Q1
+```
+  
+## Q2 For the month with the highest number of flights, what is that value? Hint: use head(1).
+```{r}
+Q2 <- flights %>%
+  group_by(month) %>%
+  summarise(n = n(), .groups = 'drop') %>%
+  arrange(desc(n)) %>%
+  head(1)
+  
+Q2
+```
+
+## Q3 Find the five shortest minimum distances, called min_dist, by origin/destination combination.  
+```{r}
+Q3 <- flights %>%
+  group_by(origin, dest) %>%
+  summarise(min_dist = mean(distance, na.rm = TRUE), .groups = 'drop') %>%
+  arrange(min_dist) %>%
+  head(5)
+Q3
+
+```
+
+
+## Q4 What five days of the year had the highest mean distance when leaving from JFK?  Sort in descending order.
+```{r}
+Q4 <- flights %>%
+  filter(origin == 'JFK') %>%
+  group_by(month, day) %>%
+  summarise(mean_distance = mean(distance, na.rm = TRUE), .groups = 'drop') %>%
+  arrange(desc(mean_distance)) %>%
+  as.data.frame() %>%
+  mutate_if(is.numeric, round, digits = 2)%>%
+  head(5)
+
+Q4
+```
+
+## Q5 Calculate the maximum arrival delay for flights to Boston and Atlanta, separately.
+```{r}
+Q5 <- flights %>%
+  filter(dest == 'BOS' | dest == 'ATL') %>%
+  group_by(dest) %>%
+  summarise(max_arr_delay = max(arr_delay, na.rm = TRUE), .groups = 'drop') %>%
+  arrange(desc(dest))
+
+Q5
+```

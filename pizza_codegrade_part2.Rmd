@@ -1,0 +1,81 @@
+  Q---
+title: "pizza_codegrade"
+author: "Joseph Christian"
+date: "2022-09-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## library
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(lm.beta))
+install.packages("lm.beta")
+```
+##load data
+```{r}
+pizza <- suppressMessages(read_csv('pizza.csv'))
+```
+
+
+## instructions and beginning notes
+```{r}
+getwd()
+describe(pizza)
+pizza
+
+```
+## Question 1: Create a correlation matrix for temperature, bill, pizzas, and got_wine.  
+```{r}
+Q1 <- pizza %>%
+  select(temperature, bill, pizzas, got_wine) %>%
+  cor() %>%
+  round(digits = 2)
+```
+  
+## Q2: Create a correlation matrix of the relationships between time, temperature, bill, and pizzas for Laura in the East branch. 
+```{r}
+Q2 <- pizza %>%
+  filter(operator == 'Laura' & branch == 'East') %>%
+  select(time, temperature, bill, pizzas) %>%
+  cor() %>%
+  round(digits = 2)
+```
+
+## Q3: Run a regression predicting whether or not wine was ordered from temperature, bill, and pizza. 
+```{r}
+wineMod <- lm(got_wine ~ temperature + bill + pizzas, data = pizza)
+summary(wineMod)
+Q3 <- summary(wineMod)$coefficients %>%
+  round(digits = 2)
+
+#potentially log reg
+
+```
+
+## Q4: Run a regression predicting bill from temperature, pizzas, and got_wine.
+```{r}
+billMod <- lm(bill ~ temperature + pizzas + got_wine, data = pizza)
+coe <- lm.beta(billMod)
+Q4 <- coe$standardized.coefficients[2:4]
+
+```
+
+## Q5: Add operator to the regression from Q4.  Which is the better model?  
+```{r}
+pizza2 <- pizza %>%
+  mutate(operator_bin = ifelse(operator == 'Laura', 1,0))
+billMod2 <- update(billMod, .~. + operator_bin, data = pizza2)
+Q5 <- AIC(billMod, k=2)
+Q5
+```
+
+
+
+
+
+

@@ -1,0 +1,97 @@
+---
+title: "fastfood_codegrade"
+author: "Joseph Christian"
+date: "2022-09-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## library
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(openintro))
+install.packages('openintro')
+```
+##load data
+```{r}
+fastfood <- openintro::fastfood
+```
+
+## instructions and beginning notes
+```{r}
+getwd()
+describe(fastfood)
+fastfood
+
+
+
+#rewatch dr longo video on pizza practice before turning in really rewatch all the submission videos
+```
+## Question 1: Looking only at Burger King and Chick-Fil-A, which item has the highest calories?  The answer should be saved as Q1.
+```{r}
+Q1 <- fastfood %>%
+  filter(restaurant == 'Burger King' | restaurant == 'Chick Fil-A') %>%
+  arrange(desc(calories)) %>%
+  head(1)
+Q1
+```
+  
+## Q2 What is the mean sugar amount for all items from Subway?  Save the value as Q2.
+```{r}
+Q2 <- fastfood %>%
+  filter(restaurant == 'Subway')%>%
+  summarise(mean_sugar = mean(sugar, na.rm = TRUE), .groups = 'drop')
+Q2
+```
+
+## Q3 What is the mean value of calories for all items from Taco Bell?  Save the value as Q3.
+```{r}
+Q3 <- fastfood %>%
+  filter(restaurant == 'Taco Bell')%>%
+  summarise(mean_calories = mean(calories, na.rm = TRUE), .groups = 'drop')
+Q3
+
+```
+
+## Q4 Create a variable equal to total_fat x sugar called fatXsugar.  Produce a tibble that has the restaurant, item, and fatXsugar for the top 3 items, from highest to lowest.
+```{r}
+Q4 <- fastfood %>%
+  mutate(fatXsugar = total_fat * sugar) %>%
+  select(restaurant, item, fatXsugar) %>%
+  arrange(desc(fatXsugar)) %>%
+  head(3)
+Q4
+```
+
+## Q5 How many restaurants have an average saturated fat over 10?
+```{r}
+Q5 <- fastfood %>%
+  group_by(restaurant) %>%
+  summarise(mean_sat_fat = mean(sat_fat, na.rm = TRUE), .groups = 'drop') %>%
+  filter(mean_sat_fat > 10) %>%
+  nrow()
+Q5
+```

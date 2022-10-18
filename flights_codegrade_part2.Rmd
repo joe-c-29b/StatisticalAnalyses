@@ -1,0 +1,117 @@
+---
+title: "NYCflights"
+author: "Joseph Christian"
+date: '2022-10-07'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+```{r}
+##installations
+install.packages("tidyverse")
+install.packages("lm.beta")
+install.packages("nycflights13")
+```
+```{r}
+#library
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(lm.beta))
+suppressPackageStartupMessages(library(nycflights13))
+```
+```{r}
+data("flights")
+summary(flights)
+```
+
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+##question 1
+```{r}
+##Address the outliers for departure delay as described in the outliers lectures, using 0.997 and 0.003 as the cutoffs.  What percentage of data remains following the removal of these outliers?   
+
+upperO <- quantile(flights$dep_delay, .997, na.rm = TRUE)
+
+lowerO <- quantile(flights$dep_delay, .003, na.rm = TRUE)
+
+upperO
+lowerO
+
+outliers <- which(flights$dep_delay > upperO | flights$dep_delay < lowerO)
+
+noOflights <- flights[-outliers,]
+
+Q1 <- (nrow(flights) - length(outliers)) / nrow(flights) *100
+
+Q1
+
+```
+
+##question 2
+```{r}
+##Run cor.test for the relationship between departure delay and distance. 
+
+Q2 <- cor.test(noOflights$dep_delay, noOflights$distance)
+
+Q2
+```
+
+##question 3
+```{r}
+##Create a regression predicting departure delay from distance.
+
+modelflights <- lm(noOflights$dep_delay ~ noOflights$distance, dat = noOflights)
+
+Q3 <- summary(modelflights)
+
+Q3
+```
+
+##question 4
+```{r}
+##Calculate standardized regression coefficients with lm.beta for the regression from Q3.
+
+lm.beta(modelflights)
+
+```
+
+
+##question 5
+```{r}
+##Create another regression, this time adding carrier to the regression from Q3. 
+
+modelflights2 <- update(modelflights, .~. + noOflights$carrier)
+
+
+Q5 <- summary(modelflights2)
+
+Q5
+```
+
+
+
+
+
+  
