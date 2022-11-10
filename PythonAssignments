@@ -1,0 +1,31 @@
+Create a program, comprehension.py. Your program should:
+Convert these string-type integers into integer-type.
+If the number within the list is divisible by 3, multiply it by 10, then replace it.
+
+import sys
+def comprehension():
+  my_ints = sys.argv[1:]
+  new_ints = []
+  for i in my_ints:
+    x = int(i)
+    if x % 3 == 0:
+        new_ints.append(x*10)
+
+    else:
+        new_ints.append(x)
+print(new_ints)
+
+comprehension()
+
+-------------------------------------------------------------------------------------------------------
+Create a program, loopindex.py. Your program should:
+Convert these string-type integers into integer-type.
+For each of the numbers in the list, add its own index position.
+
+import sys
+def loopindex():
+  loop_list = sys.argv[1:]
+  
+  new_ints = []
+  for i in my_ints:
+    x = int(i)
