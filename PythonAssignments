@@ -32,3 +32,66 @@ def loopindex():
   new_list.append(x+y)
   
 print(new_list)
+
+------------------------------------------------------------------------------------------------------
+Create a program, counter.py. You are given a single string argument. Print a dictionary where the keys 
+are composed of each letter from a word and values are the sum of each letters’ appearances. 
+The key order should be in the order of the letters’ appearances.
+
+import sys
+def counter():
+
+word = 'variable'
+word2 = word.lower()
+letters = []
+counts = {}
+
+for i in word:
+  if i not in letters:
+    letters.append(i)
+  else:
+    continue
+for i in letters:  
+  x = word.count(i)
+  counts[i] = x
+print(counts)
+
+counter()
+
+-------------------------------------------------------------------------------------------------------
+Create a program, duckgoose.py which removes all the ‘goose’ within the list then print the remaining list.
+
+import sys
+def duckgoose():
+  duck_goose = sys.argv[1:]
+  
+duck_goose = ['goose', 'duck', 'duck', 'goose', 'goose']
+just_duck = []
+
+for i in duck_goose:
+  if i == 'goose':
+    continue
+  else:
+    just_duck.append(i)
+print(just_duck)
+
+duckgoose()
+
+--------------------------------------------------------------------------------------------------------
+Create a program, duplicates.py. It should:
+Remove all duplicate words from the list 
+Then print it in descending order of alphabets (from Z to A).
+
+import sys
+def duplicates():
+  duplicated_words = sys.argv[1:]
+  Z_A = sorted(duplicated_words, reverse = True)
+  single_words = []
+  for i in Z_A:
+    if i not in single_words:
+      single_words.append(i)
+    else:
+      continue
+  print(single_words)
+  
+duplicates()
