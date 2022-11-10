@@ -25,7 +25,10 @@ For each of the numbers in the list, add its own index position.
 import sys
 def loopindex():
   loop_list = sys.argv[1:]
+  new_list = []
+  for i in loop_list:
+  x = int(i)
+  y = loop_list.index(i)
+  new_list.append(x+y)
   
-  new_ints = []
-  for i in my_ints:
-    x = int(i)
+print(new_list)
