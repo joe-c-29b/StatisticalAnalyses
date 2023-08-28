@@ -1,4 +1,99 @@
+## http://www.sthda.com/english/wiki/ggplot2-colors-how-to-change-colors-automatically-and-manually
+####################
+####################
+## creating palettes between 2 colors
+#rainbow(n), heat.colors(n), terrain.colors(n), topo.colors(n), and cm.colors(n).
+# Use rainbow colors
+barplot(1:5, col=rainbow(5))
+# Use heat.colors
+barplot(1:5, col=heat.colors(5))
+# Use terrain.colors
+barplot(1:5, col=terrain.colors(5))
+# Use topo.colors
+barplot(1:5, col=topo.colors(5))
+# Use cm.colors
+barplot(1:5, col=cm.colors(5))
+# create your rainbow
 cool = rainbow(50, start=rgb2hsv(col2rgb('cyan'))[1], end=rgb2hsv(col2rgb('blue'))[1])
 warm = rainbow(50, start=rgb2hsv(col2rgb('red'))[1], end=rgb2hsv(col2rgb('yellow'))[1])
 cols = c(rev(cool), rev(warm))
 mypalette <- colorRampPalette(cols)(255)
+####################
+####################
+##Gradient colors for the scatter plot
+# Color by qsec values
+sp2<-ggplot(mtcars, aes(x=wt, y=mpg, color=qsec)) + geom_point()
+sp2
+# Change the low and high colors
+# Sequential color scheme
+sp2+scale_color_gradient(low="blue", high="red")
+# Diverging color scheme
+mid<-mean(mtcars$qsec)
+sp2+scale_color_gradient2(midpoint=mid, low="blue", mid="white",
+                     high="red", space ="Lab" )
+set.seed(1234)
+x <- rnorm(200)
+# Histogram
+hp<-qplot(x =x, fill=..count.., geom="histogram") 
+hp
+# Sequential color scheme
+hp+scale_fill_gradient(low="blue", high="red")
+# Scatter plot
+# Color points by the mpg variable
+sp3<-ggplot(mtcars, aes(x=wt, y=mpg, color=mpg)) + geom_point()
+sp3
+# Gradient between n colors
+sp3+scale_color_gradientn(colours = rainbow(5))
+####################
+####################
+##The lightness (l) and the chroma (c, intensity of color) of the default (hue) colors can be modified using the functions scale_hue as follow :
+# Box plot
+bp + scale_fill_hue(l=40, c=35)
+# Scatter plot
+sp + scale_color_hue(l=40, c=35)
+####################
+####################
+##Change colors manually
+# Box plot
+bp + scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"))
+# Scatter plot
+sp + scale_color_manual(values=c("#999999", "#E69F00", "#56B4E9"))
+
+# Box plot
+bp + scale_fill_manual(breaks = c("2", "1", "0.5"),   #this allows you to label the colors in the legend
+                       values=c("red", "blue", "green"))
+# Scatter plot
+sp + scale_color_manual(breaks = c("8", "6", "4"),  #this allows you to label the colors in the legend
+                        values=c("red", "blue", "green"))
+####################
+####################
+##RColorBrewer palettes
+install.packages("RColorBrewer")
+library("RColorBrewer")
+display.brewer.all()
+# Box plot
+bp + scale_fill_brewer(palette="Dark2")
+# Scatter plot
+sp + scale_color_brewer(palette="Dark2")
+####################
+####################
+##Wes Anderson color Palettes
+# Install
+install.packages("wesanderson")
+# Load
+library(wesanderson)
+barplot(c(2,5,7), col=wes.palette(n=3, name="GrandBudapest"))
+####################
+####################
+##grayscale
+# Box plot
+bp + scale_fill_grey() + theme_classic()
+# Scatter plot
+sp + scale_color_grey() + theme_classic()
+#adjusting gray values
+# Box plot
+bp + scale_fill_grey(start=0.8, end=0.2) + theme_classic()
+# Scatter plot
+sp + scale_color_grey(start=0.8, end=0.2) + theme_classic()
+####################
+####################
