@@ -1,0 +1,23 @@
+##removing legend
++ theme(legend.position='none') 
+
+##removing axis labels
++ theme(axis.title.x=element_blank(), axis.title.y=element_blank())  
+
+##changing legend label
++ labs(fill="legend title")  #fill/color or whatever aspect the current legend is for
+
+##changing axis labels
++ labs(y="y axis title", x="x axis title")
+
+##change colors
++ scale_fill_manual(values=c())
+
+##add a bold line for the axis
++ theme( axis.line = element_line(colour = "darkblue", size = 1, linetype = "solid"))
+
+##changing tick mark labels
++ scale_y_continuous(limits=c(0,100), breaks=c(25,50,75,100), labels=c("25%","50%","75%","100%"))
+
+##making rounded bar graphs
++ geom_chicklet(radius=grid::unit(5, "mm")) #replace geom_bar with this
