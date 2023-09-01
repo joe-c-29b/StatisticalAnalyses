@@ -1,0 +1,25 @@
+
+
+
+
+
+	##functions used: cor(), mutate_if(), AIC(), na.omit(), glm(), binomial(), filter(), select(), mutate(), transmute(), $coefficients, update(), $null.deviance, $deviance, $df.null, $df.residual, pchisq(), cat(), summary(), sd(), mean(), max(), sum(), min(), group_by(), cor.test(), as.matrix(), rcorr(), ggplot(), geom_point(), +facet_wrap(), geom_col(), aes(), stat_count(), geom_boxplot(), corrplot(), length(), which(), quantile(), rename(), aov(), TukeyHSD(), lm(), as.data.frame(), nrow(), round(), summarise(), summary(), ols_step_all_possible() 
+	##concepts involved:
+		## data cleaning
+		## outlier identification
+		## outlier removal
+		## evaluating effects of outlier removal
+		## using AIC and R-squared for predictor selection
+		## using mutate, transmute, summarise, group_by, and filter() to create new data using the existing data (metadata)
+		## boxplot creation
+		## exploring data with boxplot
+		## ANOVA tests
+		## regression model creation
+		## logistic regression model creation
+		## predicting values using statistical models
+		## different methods for outlier identification and removal
+		## visualizing distributions with stat_count()
+		## creating correlation matrix
+		## creating comparative graphs using facet_wrap(); visually comparing predictors
+		## basic descriptive statistics
+		## Chi-Squared test
