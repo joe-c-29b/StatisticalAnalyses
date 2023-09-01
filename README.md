@@ -7,7 +7,7 @@ See the Table of Contents Excel Document
 
 
 
-##RegressionModels&predicting_examples:
+## RegressionModels&predicting_examples:
 	##functions used: filter(), select(), mutate(), glm(), lm(), binomial(), round(), $coefficients, AIC(), lm.beta(), table(), summary(), $standardized.coefficients, cor.test(), na.omit(), cor(), print(), 
 	##concepts involved:
 		## predicting missing values using existing data, narrowing predictors
@@ -17,7 +17,7 @@ See the Table of Contents Excel Document
 		## logistic regression modeling
 		## logistic regression predicting
 
-##Summarise&GroupBy_examples:
+## Summarise&GroupBy_examples:
 	##functions used: head(), select(), arrange(), summarise(), group_by(), filter(), mutate(), mutate_if(), max(), mean(), as.data.frame()
 	##concepts involved:
 		## using summarise and group_by to inspect data
@@ -26,7 +26,7 @@ See the Table of Contents Excel Document
 
 
 
-##OutlierIdentification_example:
+## OutlierIdentification_example:
 	##functions used: quantile(), which(), nrow(), length(), cor.test(), lm(), summary(), lm.beta()
 	##concepts involved:
 		## identifying outliers
@@ -35,7 +35,7 @@ See the Table of Contents Excel Document
 		## creating a model after adjusting for outliers
 
 
-##GraphAesthetics:
+## GraphAesthetics:**
 	##functions used: +theme(), +labs(), +scale_fill_manual(), +scale_x_continuous(), +scale_y_continuous(), geom_chicklet()
 	##concepts involved:
 		## removing legend
