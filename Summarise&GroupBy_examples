@@ -47,5 +47,10 @@ Q5 <- pizza %>%
   head(1)
 ```
 
+	##functions used: head(), select(), arrange(), summarise(), group_by(), filter()
+	##concepts involved:
+		## using summarise and group_by to inspect data
+		## manipulating data using summarise and group by
+
 
 
