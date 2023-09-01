@@ -1,6 +1,7 @@
 #Summarise and Group By examples
 
-
+################################
+################################
 ##setup for some data to use
 ```{r}
 suppressPackageStartupMessages(library(tidyverse))
@@ -15,8 +16,6 @@ Q1 <- pizza %>%
   filter(free_wine == 1 & discount_customer == 1 & pizzas > 4) %>%
   select(driver) 
 ```
-
-
 ##first summarise
 ```{r}
 Q2 <- pizza %>%
@@ -47,7 +46,68 @@ Q5 <- pizza %>%
   head(1)
 ```
 
-	##functions used: head(), select(), arrange(), summarise(), group_by(), filter()
+
+
+
+
+################################
+################################
+## another example
+################################
+################################
+## library
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(nycflights13))
+data(flights)
+```
+```
+## Question 1: What is the mean distance of flights for each of the carriers AA, EV, and FL?
+```{r}
+Q1 <- flights %>%
+  group_by(carrier) %>%
+  filter(carrier == 'AA' | carrier == 'EV' | carrier == 'FL') %>%
+  summarise(mean_dist = mean(distance, na.rm = 'TRUE'), .groups = 'drop') %>%
+  as.data.frame() %>%
+  mutate_if(is.numeric, round, digits = 2)
+```
+## Q2 For the month with the highest number of flights, what is that value? Hint: use head(1).
+```{r}
+Q2 <- flights %>%
+  group_by(month) %>%
+  summarise(n = n(), .groups = 'drop') %>%
+  arrange(desc(n)) %>%
+  head(1)
+```
+## Q3 Find the five shortest minimum distances, called min_dist, by origin/destination combination.  
+```{r}
+Q3 <- flights %>%
+  group_by(origin, dest) %>%
+  summarise(min_dist = mean(distance, na.rm = TRUE), .groups = 'drop') %>%
+  arrange(min_dist) %>%
+  head(5)
+```
+## Q4 What five days of the year had the highest mean distance when leaving from JFK?  Sort in descending order.
+```{r}
+Q4 <- flights %>%
+  filter(origin == 'JFK') %>%
+  group_by(month, day) %>%
+  summarise(mean_distance = mean(distance, na.rm = TRUE), .groups = 'drop') %>%
+  arrange(desc(mean_distance)) %>%
+  as.data.frame() %>%
+  mutate_if(is.numeric, round, digits = 2)%>%
+  head(5)
+```
+## Q5 Calculate the maximum arrival delay for flights to Boston and Atlanta, separately.
+```{r}
+Q5 <- flights %>%
+  filter(dest == 'BOS' | dest == 'ATL') %>%
+  group_by(dest) %>%
+  summarise(max_arr_delay = max(arr_delay, na.rm = TRUE), .groups = 'drop') %>%
+  arrange(desc(dest))
+```
+
+	##functions used: head(), select(), arrange(), summarise(), group_by(), filter(), mutate(), mutate_if(), max(), mean(), as.data.frame()
 	##concepts involved:
 		## using summarise and group_by to inspect data
 		## manipulating data using summarise and group by
