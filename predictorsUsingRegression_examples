@@ -1,0 +1,59 @@
+
+## Setup for some data
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(openintro))
+suppressPackageStartupMessages(library(lm.beta))
+suppressPackageStartupMessages(library(Hmisc))
+install.packages('openintro')
+install.packages('Hmisc')
+```
+```{r}
+fastfood <- openintro::fastfood
+```
+
+## Data Cleaning example and quick correlation test; predicting missing values using existing data
+```{r}
+SMreg <- fastfood %>%
+  filter(restaurant == 'Mcdonalds' | restaurant == 'Subway')%>%
+  select(restaurant, calories, sodium, protein) %>%
+  mutate(restbin = ifelse(restaurant == 'Mcdonalds', 1, 0))
+SMregModel <- glm(restbin ~ calories + sodium + protein, binomial(), data = SMreg)
+Q2 <- SMregModel$coefficients %>% round(digits = 2)
+```
+## quick AIC example
+```{r}
+SMregModel2 <- glm(restbin ~ calories + protein, data = SMreg)
+SMregModel2
+Q3 <- AIC(SMregModel, k=2) %>% round(digits = 2)
+```
+## lm.beta example; identifying strongest predictors
+```{r}
+calModel <- lm(calories ~ sat_fat + fiber + sugar, data = fastfood)
+lm.beta(calModel)
+Q4 <- calModel$coefficients [2] %>%
+  round(digits = 2)
+```
+## predicting missing values using existing data, narrowing predictors
+```{r}
+table(fastfood$restaurant)
+
+fiftyPlus <- fastfood %>%
+  filter(restaurant == 'Arbys' | restaurant == 'Mcdonalds' | restaurant == 'Sonic') %>%
+  select(total_fat, cholesterol, total_carb, vit_a, restaurant) 
+fiftyPlus
+
+TotFat <- lm(total_fat ~ cholesterol + total_carb + vit_a + restaurant, data = fiftyPlus)
+summary(TotFat)
+TotFat2 <- lm(total_fat ~ cholesterol + total_carb + restaurant, data = fiftyPlus)
+Tots <- lm.beta(TotFat2)
+Q5 <- Tots$standardized.coefficients [2] %>% round(digits = 2)
+```
+
+
+
+## all functions used: filter(), select(), mutate(), glm(), lm(), binomial(), round(), $coefficients, AIC(), lm.beta(), table(), summary(), $standardized.coefficients
+## predicting missing values using existing data, narrowing predictors
+## lm.beta example; identifying strongest predictors
+## quick AIC example
+## Data Cleaning example and quick correlation test; predicting missing values using existing data
