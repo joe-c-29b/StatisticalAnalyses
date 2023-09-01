@@ -97,3 +97,16 @@ bp + scale_fill_grey(start=0.8, end=0.2) + theme_classic()
 sp + scale_color_grey(start=0.8, end=0.2) + theme_classic()
 ####################
 ####################
+
+
+	##functions used: rainbow(), heat.colors(), terrain.colors(), topo.colors(), cm.colors(), barplot(), colorRampPalette(), ggplot(), +scale_color_gradient2(), +scale_color_gradient(), +scale_fill_gradient(), qplot(), aes(), mean(), geom_point(), scale_fill_hue(), display.brewer.all(), wes.palette(), +scale_fill_brewer(), +scale_color_brewer(), scale_color_grey(), scale_fill_grey(), theme_classic()
+	##concepts involved:
+		## creating palettes between two colors
+		## using gradient colors on a scatterplot
+		## changing order of colors
+		## diverging color scheme
+		## adjusting lightness, color intensity, and hue
+		## manually assigning colors
+		## using color brewer
+		## using grayscale
+		## using wesanderson
