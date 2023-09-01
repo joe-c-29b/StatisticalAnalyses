@@ -1,4 +1,5 @@
-
+#######################
+#######################
 ## Setup for some data
 ```{r}
 suppressPackageStartupMessages(library(tidyverse))
@@ -11,7 +12,6 @@ install.packages('Hmisc')
 ```{r}
 fastfood <- openintro::fastfood
 ```
-
 ## Data Cleaning example and quick correlation test; predicting missing values using existing data
 ```{r}
 SMreg <- fastfood %>%
@@ -51,9 +51,74 @@ Q5 <- Tots$standardized.coefficients [2] %>% round(digits = 2)
 ```
 
 
+#######################
+#######################
+## Another example
+#######################
+#######################
+```{r}
+##installations
+install.packages("tidyverse")
+install.packages("lm.beta")
+```
+```{r}
+#library
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(lm.beta))
+```
+```{r}
+data("msleep")
+summary(msleep)
+```
+##question 1
+##Run cor.test for the relationship between total sleep and body weight.  You should not round these values.
+```{r}
+Q1 <- cor.test(msleep$sleep_total, msleep$bodywt)
+```
+##question 2
+##Create a correlation matrix for the relations among total sleep, rem sleep, brain weight, and body weight.  Make sure to remove missing values.
+```{r}
+Q2 <- select(msleep, sleep_total, sleep_rem, brainwt, bodywt) %>%
+  na.omit() %>%
+  cor() %>%
+  round(digits = 2)
+```
+##question 3
+##Run a regression predicting body weight by vore. 
+```{r}
+sleepModel <- lm(bodywt ~ vore, data = msleep)
+Q3 <- round(sleepModel$coefficients, digits = 2)
+```
+##question 4
+##Create a regression predicting bodywt by vore and REM sleep.  Compared to the model in Q3, which one has the better AIC?
+```{r}
+sleepModel2 <- lm(msleep$bodywt ~ msleep$vore + msleep$sleep_rem, data = msleep)
+AICmod1 <- AIC(sleepModel, k = 1)
+AICmod2 <- AIC(sleepModel2, k = 2)
+print(AICmod1)
+print(AICmod2)
+Q4 <- AICmod2
+```
+##question 5
+##Create a logistic regression predicting whether or not an animal is a carnivore or herbivore based on sleep total.  Assign the model to Q5.
+```{r}
+voreSleep <- msleep %>%
+  select(vore, sleep_total) %>%
+  filter(vore != "omni" & vore != "insecti") %>%
+  mutate(vorebin = ifelse(vore == 'carni', 0, 1))
+voreSleep
+voreSleepMod <- glm(vorebin ~ sleep_total, binomial(), data = voreSleep)
+Q5 <- voreSleepMod
+```
 
-## all functions used: filter(), select(), mutate(), glm(), lm(), binomial(), round(), $coefficients, AIC(), lm.beta(), table(), summary(), $standardized.coefficients
-## predicting missing values using existing data, narrowing predictors
-## lm.beta example; identifying strongest predictors
-## quick AIC example
-## Data Cleaning example and quick correlation test; predicting missing values using existing data
+
+
+
+	##functions used: filter(), select(), mutate(), glm(), lm(), binomial(), round(), $coefficients, AIC(), lm.beta(), table(), summary(), $standardized.coefficients, cor.test(), na.omit(), cor(), print(), 
+	##concepts involved:
+		## predicting missing values using existing data, narrowing predictors
+		## lm.beta example; identifying strongest predictors
+		## AIC examples
+		## Data Cleaning example and quick correlation test; predicting missing values using existing data
+		## logistic regression modeling
+		## logistic regression predicting
