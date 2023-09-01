@@ -2,6 +2,11 @@
 Samples for different R-studio analysis functions
 
 See the Table of Contents Excel Document
+
+
+
+
+
 ##RegressionModels&predicting_examples:
 	##functions used: filter(), select(), mutate(), glm(), lm(), binomial(), round(), $coefficients, AIC(), lm.beta(), table(), summary(), $standardized.coefficients, cor.test(), na.omit(), cor(), print(), 
 	##concepts involved:
