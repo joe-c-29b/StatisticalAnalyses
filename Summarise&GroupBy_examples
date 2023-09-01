@@ -1,0 +1,51 @@
+#Summarise and Group By examples
+
+
+##setup for some data to use
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(psych))
+install.packages('psych')
+```
+```{r}
+pizza <- suppressMessages(read_csv('pizza.csv'))
+```
+```{r}
+Q1 <- pizza %>%
+  filter(free_wine == 1 & discount_customer == 1 & pizzas > 4) %>%
+  select(driver) 
+```
+
+
+##first summarise
+```{r}
+Q2 <- pizza %>%
+  summarise(mean_ratio = mean(bill / pizzas, na.rm = TRUE), .groups = 'drop')
+Q2
+```
+
+##GroupBy and Summarise
+```{r}
+Q3 <- pizza %>%
+  group_by(day) %>%
+  summarise(var_pizzas = var(pizzas), .groups = 'drop')
+```
+```{r}
+Q4 <- pizza %>%
+  group_by(operator) %>%
+  summarise(mean_bill = mean(bill), .groups = 'drop') %>%
+  arrange(desc(mean_bill)) %>%
+  select(operator) %>%
+  head(1)
+```
+```{r}
+Q5 <- pizza %>%
+  group_by(day, driver) %>%
+  summarise(n = sum(free_wine), .groups = 'drop')%>%
+  arrange(desc(n)) %>%
+  select(day, driver, n) %>%
+  head(1)
+```
+
+
+
