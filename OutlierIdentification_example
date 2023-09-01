@@ -1,0 +1,37 @@
+##setting up
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(lm.beta))
+suppressPackageStartupMessages(library(nycflights13))
+
+## identifying outliers
+## removing outliers
+```{r}
+upperO <- quantile(flights$dep_delay, .997, na.rm = TRUE)
+lowerO <- quantile(flights$dep_delay, .003, na.rm = TRUE)
+upperO
+lowerO
+```
+```{r}
+outliers <- which(flights$dep_delay > upperO | flights$dep_delay < lowerO)
+noOflights <- flights[-outliers,]
+Q1 <- (nrow(flights) - length(outliers)) / nrow(flights) *100
+```
+```{r}
+Q2 <- cor.test(noOflights$dep_delay, noOflights$distance)
+```
+## creating a model after adjusting for outliers
+```{r}
+modelflights <- lm(noOflights$dep_delay ~ noOflights$distance, dat = noOflights)
+Q3 <- summary(modelflights)
+```
+```{r}
+Q4 <- lm.beta(modelflights)
+```
+
+##OutlierIdentification_example:
+	##functions used: quantile(), which(), nrow(), length(), cor.test(), lm(), summary(), lm.beta()
+	##concepts involved:
+		## identifying outliers
+		## removing outliers
+		## setting aside outliers
+		## creating a model after adjusting for outliers
