@@ -21,3 +21,16 @@
 
 ##making rounded bar graphs
 + geom_chicklet(radius=grid::unit(5, "mm")) #replace geom_bar with this
+
+
+
+	##functions used: +theme(), +labs(), +scale_fill_manual(), +scale_x_continuous(), +scale_y_continuous(), geom_chicklet()
+	##concepts involved:
+		## removing legend
+		## removing axis labels
+		## changing legend label
+		## changing axis labels
+		## change colors
+		## add a bold line for the axis
+		## changing tick mark labels
+		## making rounded bar graphs
