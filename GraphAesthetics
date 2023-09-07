@@ -1,13 +1,19 @@
 ##removing legend
 + theme(legend.position='none') 
 
-##changing legend label
+##removing legend title
++ theme(legend.title=element_blank()) 
+
+##changing legend labels
++ theme(name="axis title", labels=c())
+
+##changing legend title
 + labs(fill="legend title")  #fill/color or whatever aspect the current legend is for
 
 ##change colors
 + scale_fill_manual(values=c())
 
-##changing axis labels
+##changing axis titles
 + labs(y="y axis title", x="x axis title")
 
 ##add a bold line for the axis
