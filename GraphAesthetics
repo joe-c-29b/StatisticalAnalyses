@@ -28,6 +28,10 @@
 ##changing tick mark labels
 + scale_y_continuous(limits=c(0,100), breaks=c(25,50,75,100), labels=c("25%","50%","75%","100%"))
 
+##rotating the entire 180 degrees on an axis
++scale_y_reverse()
++scale_x_reverse()
+
 
 
 ##making rounded bar graphs
@@ -38,7 +42,7 @@
 
 
 
-	##functions used: +theme(), +labs(), +scale_fill_manual(), +scale_x_continuous(), +scale_y_continuous(), geom_chicklet(), geom_smooth()
+	##functions used: +theme(), +labs(), +scale_fill_manual(), +scale_x_continuous(), +scale_y_continuous(), geom_chicklet(), geom_smooth(), scale_y_reverse(), scale_x_reverse()
 	##concepts involved:
 		## removing legend
 		## removing axis labels
@@ -49,3 +53,4 @@
 		## changing tick mark labels
 		## making rounded bar graphs
 		## adding a regression trendline to a scatterplot
+		## rotate graph
