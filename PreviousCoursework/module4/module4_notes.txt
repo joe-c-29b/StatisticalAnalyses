@@ -1,0 +1,150 @@
+Module4_notes
+
+What is Time Series Analysis
+	Forecasting = predicting the future state of some key variable, to predict future values of quantitative data
+	Time Series Analysis = sequence of observations on a variable that occur at equally spaced time intervals
+		business questions:
+			-what will demand for a business' product be next year?
+			-how will revenue be affected by different seasons during the year?
+		needs for time series:
+			1) past data about what we want to forecast
+			2) data must be quantitative or quantifiable
+			3) expectation that past data patterns will extend to future
+
+
+Patterns in Time Series Data
+	Random fluctuations = data fluctuations that do not demonstrate a particular pattern
+	Horizantal pattern = pattern viewed along the x axis
+	Stationary data = average isn't changing up or down over time
+	Seasonality = data points vary based on time of year/ season
+	Linear patterns = downward or upward trends
+	exponential trend pattern = the absolute change from one time period to the next is different, but the percent change from one time period to the next is the same
+	
+
+
+Naive Forecasting Methods and Forecast Accuracy
+	Naive method = use the actual value from previous period to forecast next period
+	Forecast error = the difference between the actual amount and the predicted amount
+		e = error
+		t = time period
+		yt = actual value
+		y^t = predicted value
+		n = total number of periods
+		k = past periods used to produce forecast
+	Methods for evaluating a forecast method:
+		-Mean Absolute Error (MAE) = average of all of the absolute values of the forecast errors
+		-Mean Squared Error (MSE) = the average of the squared errors
+		-Root Mean Squared Error (RMSE) = the square root of the MSE
+		-Mean Absolute Percentage Error (MAPE) =  ;allows to compare forecasts across different time unity
+
+
+Simple Moving Average
+	simple moving average = take the average of several of the most recent time periods to use for each forecasted value, for the next point, just move the average forward by one time period
+		a method of short term forecasting, filters out short term fluctuations and smooths out existing data, sometimes called the "smoothing approach"
+	centered moving average = take values for an odd number of time periods centered around a midpoint and average all those values together
+	One-sided moving average = average a few time periods before the current time period
+	Accuracy = minimizing error between actual and predicted values
+		looking for the lowest values for accuracy measures; the lowest are the best
+	moving average is good for datasets displaying a horizantal pattern
+
+
+
+
+
+Simple Exponential Smoothing Method
+	simple exponential smoothing method = weighted sum of the past values of the time series variable; weights past data values less than more recent data values in forecasting
+		a short-term forecasting method for time series data showing a horizontal pattern
+	how to choose a smoothing constant?
+		decide on how much weight to give the current and past values of time series variable
+			large alpha = more attention to most recent observation; less smoothing
+			small alpha = additional attention to past observation; more smoothing
+		Default smoothing constant = 0.2
+
+
+
+Using Regression for Forecasting
+	What if the data demonstrates a systemic trend up or down?
+		Can use regression analysis
+	Regression is a statistical method used to create a model and equation that shows how variables are related
+		can be used to make predictions
+		one outcome variable
+		one or more predictors
+	Simple Linear Regression Model = outcome variable: time series variable you are trying to forecast; predictor variable is time
+	Time variable = trend variable
+	**it only gives you a reasonable prediction for data with a very strong linear trend; only if you are very certain that the linear trend will continue into the future
+	
+
+
+
+Seasonality without Trend
+	Linear Regression can allow us to make prediction when our data shows seasonality
+	Seasonal effects around a horizontal mean line
+		add dummy variables to the model to account for seasonal (predictable time spikes)
+		dummy variables act as parts of a whole
+			can't add all of them
+				k = levels in a categorical variable
+				k-1 = the number of dummy variables in a model (because zeroes across the board counts as a category as well
+				reference (comparison) variable = the dummy category you leave out
+				interpret the slope coefficients in comparison to the reference variable
+
+
+
+Quadratic Trend Model
+	Polynomial regression models capture curvilinear trends
+	Quadratic Models are just one type of polynomial regression models
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
