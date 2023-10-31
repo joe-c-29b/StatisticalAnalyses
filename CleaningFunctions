@@ -1,0 +1,6 @@
+##how to drop the last character of a string
+```{r}
+library(stringr)
+PHED_4g <- PHED_data %>% 
+  mutate(FY = str_sub(YRTR, end = -2))
+```
