@@ -40,9 +40,14 @@
 ##adding a regression trendline to a scatterplot
 + geom_smooth(method=lm, linewidth=2, color="#1A69B1", fill="purple")
 
+##making side-by-side bar graph
++ geom_bar(stat = "identity", position = "dodge")
 
+##making multiple line graph
+ggplot(data, aes(x= , y= , color=as.factor( `grouping column` ))) +
+  geom_line(stat="identity")
 
-	##functions used: +theme(), +labs(), +scale_fill_manual(), +scale_x_continuous(), +scale_y_continuous(), geom_chicklet(), geom_smooth(), scale_y_reverse(), scale_x_reverse()
+	##functions used: +theme(), +labs(), +scale_fill_manual(), +scale_x_continuous(), +scale_y_continuous(), geom_bar(), geom_chicklet(), geom_smooth(), scale_y_reverse(), scale_x_reverse()
 	##concepts involved:
 		## removing legend
 		## removing axis labels
@@ -54,3 +59,5 @@
 		## making rounded bar graphs
 		## adding a regression trendline to a scatterplot
 		## rotate graph
+		## side-by-side bar graph
+		# multiple line graph
