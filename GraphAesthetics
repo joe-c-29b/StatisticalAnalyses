@@ -8,7 +8,7 @@
 + theme(name="axis title", labels=c())
 
 ##changing legend title
-+ labs(fill="legend title")  #fill/color or whatever aspect the current legend is for
++ labs(fill="legend title")  #fill/color or whatever aspect the current legend is for  #basically, whatever you are using as your 3rd element, fill= or color=, that your legend is going to be describing
 
 ##change colors
 + scale_fill_manual(values=c())
