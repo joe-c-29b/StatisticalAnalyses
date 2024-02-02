@@ -13,8 +13,8 @@
 ##change colors
 + scale_fill_manual(values=c())
 
-##changing axis titles
-+ labs(y="y axis title", x="x axis title")
+##changing graph and axis titles
++ labs(title="graph title", y="y axis title", x="x axis title")
 
 ##add a bold line for the axis
 + theme( axis.line = element_line(colour = "darkblue", size = 1, linetype = "solid"))
@@ -32,6 +32,24 @@
 +scale_y_reverse()
 +scale_x_reverse()
 
+##changing line thickness and color
++ geom_line(aes(linewidth=.2))
+
+##changing graph and axis titles
++ ggtitle("graph title")
++ labs(title="graph title", y="y axis title", x="x axis title")
++ theme(plot.title = element_text(family, face, colour, size), axis.title.x = element_text(family, face, colour, size), axis.title.y = element_text(family, face, colour, size))
+	#family : font family
+	#face : font face. Possible values are “plain”, “italic”, “bold” and “bold.italic”
+	#colour : text color
+	#size : text size in pts
+	#hjust : horizontal justification (in [0, 1])
+	#vjust : vertical justification (in [0, 1])
+	#lineheight : line height. In multi-line text, the lineheight argument is used to change the spacing between lines.
+	#color : an alias for colour
+
+
+
 
 
 ##making rounded bar graphs
@@ -47,12 +65,11 @@
 ggplot(data, aes(x= , y= , color=as.factor( `grouping column` ))) +
   geom_line(stat="identity")
 
-	##functions used: +theme(), +labs(), +scale_fill_manual(), +scale_x_continuous(), +scale_y_continuous(), geom_bar(), geom_chicklet(), geom_smooth(), scale_y_reverse(), scale_x_reverse()
+	##functions used: +theme(), +labs(), +scale_fill_manual(), +scale_x_continuous(), +scale_y_continuous(), geom_bar(), geom_chicklet(), geom_smooth(), scale_y_reverse(), scale_x_reverse(), ggtitle(), geom_line()
 	##concepts involved:
 		## removing legend
 		## removing axis labels
 		## changing legend label
-		## changing axis labels
 		## change colors
 		## add a bold line for the axis
 		## changing tick mark labels
@@ -60,4 +77,6 @@ ggplot(data, aes(x= , y= , color=as.factor( `grouping column` ))) +
 		## adding a regression trendline to a scatterplot
 		## rotate graph
 		## side-by-side bar graph
-		# multiple line graph
+		## multiple line graph
+		## changing line thickness
+		## changing graph and axis titles
