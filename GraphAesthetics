@@ -55,6 +55,9 @@
 ##making rounded bar graphs
 + geom_chicklet(radius=grid::unit(5, "mm")) #replace geom_bar with this
 
+##making rounded line ends for line graph
++ geom_line(aes(), lineed="round")
+
 ##adding a regression trendline to a scatterplot
 + geom_smooth(method=lm, linewidth=2, color="#1A69B1", fill="purple")
 
