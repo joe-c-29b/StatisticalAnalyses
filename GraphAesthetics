@@ -33,7 +33,7 @@
 +scale_x_reverse()
 
 ##changing line thickness and color
-+ geom_line(aes(linewidth=.2))
++ geom_line(linewidth=.2)
 
 ##changing graph and axis titles
 + ggtitle("graph title")
