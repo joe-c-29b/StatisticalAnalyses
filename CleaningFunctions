@@ -4,3 +4,13 @@ library(stringr)
 PHED_4g <- PHED_data %>% 
   mutate(FY = str_sub(YRTR, end = -2))
 ```
+##how to assign multiple variables at once
+```{r}
+library(zeallot)
+names <- c("v1","v2","v3")
+c(var1, var2, var3) %<-% names[c(1,2,3)]
+
+#example using above operator to fix column names for multiple dataframes at once
+names <- c("Term","Term","Term")
+c(colnames(df)[1],colnames(df2)[1],colnames(df3)[1]) %<-% names[c(1,2,3)]
+```
