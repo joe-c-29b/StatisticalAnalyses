@@ -13,6 +13,9 @@
 ##changing legend title
 + labs(fill="legend title")  #fill/color or whatever aspect the current legend is for  #basically, whatever you are using as your 3rd element, fill= or color=, that your legend is going to be describing
 
+##reordering a legend title & bar order
+df$colname <- factor(df$colname, levels=c('lvl1', 'lvl2', 'lvl3', 'lvl4'))  #this allows you to place the values in whatever order you want for your graph
+
 ##change colors
 + scale_fill_manual(values=c())
 
@@ -71,12 +74,13 @@
 ggplot(data, aes(x= , y= , color=as.factor( `grouping column` ))) +
   geom_line(stat="identity")
 
-	##functions used: +theme(), +labs(), +scale_fill_manual(), +scale_x_continuous(), +scale_y_continuous(), geom_bar(), geom_chicklet(), geom_smooth(), scale_y_reverse(), scale_x_reverse(), ggtitle(), geom_line()
+	##functions used: +theme(), +labs(), +scale_fill_manual(), +scale_x_continuous(), +scale_y_continuous(), geom_bar(), geom_chicklet(), geom_smooth(), scale_y_reverse(), scale_x_reverse(), ggtitle(), geom_line(), factor()
 	##concepts involved:
 		##a dding a title
 		## removing legend
 		## removing axis labels
 		## changing legend label
+		## reordering a legend title & bar order
 		## change colors
 		## add a bold line for the axis
 		## changing tick mark labels
