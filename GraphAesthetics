@@ -1,3 +1,6 @@
+##adding watermark
++ geom_text(x=,y=, label='Not for Publication or Use Outside This Report')
+
 ##adding a title
 + labs(title="titleText")
 
@@ -54,9 +57,22 @@ df$colname <- factor(df$colname, levels=c('lvl1', 'lvl2', 'lvl3', 'lvl4'))  #thi
 	#lineheight : line height. In multi-line text, the lineheight argument is used to change the spacing between lines.
 	#color : an alias for colour
 
-
-
-
+##adding text labels/annotation on graph
++ geom_text()
+	# Simple scatter plot
+	sp <- ggplot(df, aes(wt, mpg, label = rownames(df))) + geom_point() + geom_text()
+	# Change the size of the texts
+	+ geom_text(size=6)
+	# Change vertical and horizontal adjustement
+	+  geom_text(hjust=0, vjust=0)
+	# Change fontface. Allowed values : 1(normal),
+	# 2(bold), 3(italic), 4(bold.italic)
+	+ geom_text(aes(fontface=2))
+	# change font
+	+ geom_text(family="Times New Roman")
+	# same as text, but adds a rectangle around annotation
+	+ geom_label()
+	# more info http://www.sthda.com/english/wiki/ggplot2-texts-add-text-annotations-to-a-graph-in-r-software
 
 ##making rounded bar graphs
 + geom_chicklet(radius=grid::unit(5, "mm")) #replace geom_bar with this
@@ -74,7 +90,8 @@ df$colname <- factor(df$colname, levels=c('lvl1', 'lvl2', 'lvl3', 'lvl4'))  #thi
 ggplot(data, aes(x= , y= , color=as.factor( `grouping column` ))) +
   geom_line(stat="identity")
 
-	##functions used: +theme(), +labs(), +scale_fill_manual(), +scale_x_continuous(), +scale_y_continuous(), geom_bar(), geom_chicklet(), geom_smooth(), scale_y_reverse(), scale_x_reverse(), ggtitle(), geom_line(), factor()
+	##functions used: +theme(), +labs(), +scale_fill_manual(), +scale_x_continuous(), +scale_y_continuous(), geom_bar(), geom_chicklet(), geom_smooth(), scale_y_reverse(), scale_x_reverse(), ggtitle(), geom_line(), factor(),
+		+geom_text(), +geom_annotate()
 	##concepts involved:
 		##a dding a title
 		## removing legend
@@ -91,3 +108,5 @@ ggplot(data, aes(x= , y= , color=as.factor( `grouping column` ))) +
 		## multiple line graph
 		## changing line thickness
 		## changing graph and axis titles
+		## adding text to graph/ adding text on graph
+		## adding watermark
