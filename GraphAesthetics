@@ -86,12 +86,16 @@ df$colname <- factor(df$colname, levels=c('lvl1', 'lvl2', 'lvl3', 'lvl4'))  #thi
 ##making side-by-side bar graph
 + geom_bar(stat = "identity", position = "dodge")
 
+##preventing bars from expanding to cover zero or null values at that x-value
+##fixing bar width
++ geom_bar(stat='identity', position=position_dodge(preserve = 'single'), aes(fill=))
+
 ##making multiple line graph
 ggplot(data, aes(x= , y= , color=as.factor( `grouping column` ))) +
   geom_line(stat="identity")
 
 	##functions used: +theme(), +labs(), +scale_fill_manual(), +scale_x_continuous(), +scale_y_continuous(), geom_bar(), geom_chicklet(), geom_smooth(), scale_y_reverse(), scale_x_reverse(), ggtitle(), geom_line(), factor(),
-		+geom_text(), +geom_annotate()
+		+geom_text(), +geom_annotate(), position_dodge()
 	##concepts involved:
 		##a dding a title
 		## removing legend
@@ -110,3 +114,5 @@ ggplot(data, aes(x= , y= , color=as.factor( `grouping column` ))) +
 		## changing graph and axis titles
 		## adding text to graph/ adding text on graph
 		## adding watermark
+		## preventing bars from expanding to cover zero or null values at that x-value
+		## fixing bar width
