@@ -112,3 +112,15 @@ sp + scale_color_grey(start=0.8, end=0.2) + theme_classic()
 		## using color brewer
 		## using grayscale
 		## using wesanderson
+
+falls1 = c("#e09f3e","#540b0e")
+falls2 = c("#e09f3e","#9e2a2b")
+falls3 = c("#fff3b0","#9e2a2b")
+falls6 = c("#edddd4","#ecc8af","#e7ad99","#ce796b","#c18c5d","#495867")
+falls6b = c("#1B1919","#ddd4c0","#969696","#5e3291","#e77120","#6ebe44")
+falls6c = c("#335c67","#606c38","#fff3b0","#e09f3e","#9e2a2b","#540b0e")
+
+rcc1 = c("#0000C0","#5D13CB")
+rcc2 = c("#0070C0","#5D13CB")
+rcc3 = c("#B4C6E7","#0000C0")
+rcc4 = c("#B4C6E7","#0070C0","#0000C0","#5D13CB")
