@@ -99,6 +99,38 @@ bp + scale_fill_grey(start=0.8, end=0.2) + theme_classic()
 sp + scale_color_grey(start=0.8, end=0.2) + theme_classic()
 ####################
 ####################
+falls1 = c("#e09f3e","#540b0e")
+falls2 = c("#e09f3e","#9e2a2b")
+falls3 = c("#fff3b0","#9e2a2b")
+falls6 = c("#edddd4","#ecc8af","#e7ad99","#ce796b","#c18c5d","#495867")
+falls6b = c("#1B1919","#ddd4c0","#969696","#5e3291","#e77120","#6ebe44")
+falls6c = c("#335c67","#606c38","#fff3b0","#e09f3e","#9e2a2b","#540b0e")
+rcc1 = c("#0000C0","#5D13CB")
+rcc2 = c("#0070C0","#5D13CB")
+rcc3 = c("#B4C6E7","#0000C0")
+rcc4 = c("#B4C6E7","#0070C0","#0000C0","#5D13CB")
+roygbiv = c('#CC0000','#FF9900','#F4EE00','#92D050','#0070C0','#7030A0')
+reds = c('#8E0000','#D20000','#FF0000','#FF7D7D','#FFB7B7')
+oranges = c('#964B00','#CC6600','#FFC000','#FFDA3F','#FFF2B9')
+greens = c('#476D1D','#659A2A','#92D050','#99FF33','#CCFFCC')
+blurple = c('#5D13CB','#0000C0','#0070C0','#B4C6E7','#EADCF8')
+Fall = c('#335c67','#fff3b0','#e09f3e','#9e2a2b','#540b0e')
+Fallgreen = c('#606c38','#283618','#f3fae0','#dda15e','#bc6c25')
+Fallblured = c('#283d3d','#197278','#edddd4','#c44536','#772e25')
+Fallpastel = c('#ecc8af','#e7ad99','#ce796b','#c18c5d','#495867')
+spooky = c('#1B1919','#ddd4c0','#969696','#5e3291','#e77120','#6ebe44')
+springblue = c('#4184CC','#9ECAF5','#f2f0f0','#beaeda','#6777b1')
+easter = c('#00a5e3','#8dd7bf','#ff96c5','#ff5768','#ffbf65')
+springbright = c('#fc6238','#ffd872','#f2d4cc','#e77577','#6c88c4')
+springflourescent = c('#00cdac','#ff6f68','#ffdacc','#ff60a8','#cff800')
+springdark = c('#c05780','#ff828b','#e7c582','#00b0bA','#0065a2')
+springvibrant = c('#ff5c77','#4dd091','#ffec59','#ffa23a','#74737a')
+distinct12 = c('#FF0000','#1B1919','#ff60a8','#beaeda','#00cdac','#8E0000','#CC6600','#476D1D','#5D13CB','#197278','#ce796b','#FFDA3F','#99FF33','#495867','#0000C0','#502626')
+Fall6 = c('#335c67','#606c38','#fff3b0','#e09f3e','#9e2a2b','#540b0e')
+Fall9 = c('#283d3d','#495867','#197278','#B4C6E7','#ecc8af','#ce796b','#c44536','#9e2a2b','#772e25')
+####################
+####################
+
 
 
 	##functions used: rainbow(), heat.colors(), terrain.colors(), topo.colors(), cm.colors(), barplot(), colorRampPalette(), ggplot(), +scale_color_gradient2(), +scale_color_gradient(), +scale_fill_gradient(), qplot(), aes(), mean(), geom_point(), scale_fill_hue(), display.brewer.all(), wes.palette(), +scale_fill_brewer(), +scale_color_brewer(), scale_color_grey(), scale_fill_grey(), theme_classic()
@@ -113,14 +145,3 @@ sp + scale_color_grey(start=0.8, end=0.2) + theme_classic()
 		## using grayscale
 		## using wesanderson
 
-falls1 = c("#e09f3e","#540b0e")
-falls2 = c("#e09f3e","#9e2a2b")
-falls3 = c("#fff3b0","#9e2a2b")
-falls6 = c("#edddd4","#ecc8af","#e7ad99","#ce796b","#c18c5d","#495867")
-falls6b = c("#1B1919","#ddd4c0","#969696","#5e3291","#e77120","#6ebe44")
-falls6c = c("#335c67","#606c38","#fff3b0","#e09f3e","#9e2a2b","#540b0e")
-
-rcc1 = c("#0000C0","#5D13CB")
-rcc2 = c("#0070C0","#5D13CB")
-rcc3 = c("#B4C6E7","#0000C0")
-rcc4 = c("#B4C6E7","#0070C0","#0000C0","#5D13CB")
