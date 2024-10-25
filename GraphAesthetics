@@ -82,6 +82,8 @@ df$colname <- factor(df$colname, levels=c('lvl1', 'lvl2', 'lvl3', 'lvl4'))  #thi
 
 ##adding a regression trendline to a scatterplot
 + geom_smooth(method=lm, linewidth=2, color="#1A69B1", fill="purple")
+	#adding a prediction regression trendline
+	+ geom_smooth(method=lm, fullrange=TRUE)
 
 ##making side-by-side bar graph
 + geom_bar(stat = "identity", position = "dodge")
@@ -107,6 +109,7 @@ ggplot(data, aes(x= , y= , color=as.factor( `grouping column` ))) +
 		## changing tick mark labels
 		## making rounded bar graphs
 		## adding a regression trendline to a scatterplot
+		## adding a prediction regression trendline
 		## rotate graph
 		## side-by-side bar graph
 		## multiple line graph
