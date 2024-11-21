@@ -36,6 +36,18 @@
 ##reordering a legend title & bar order
 df$colname <- factor(df$colname, levels=c('lvl1', 'lvl2', 'lvl3', 'lvl4'))  #this allows you to place the values in whatever order you want for your graph
 
+##Linetypes
+(0 = blank, 1 = solid, 2 = dashed, 3 = dotted, 4 = dotdash, 5 = longdash, 6 = twodash)
+	##customizing a dotdash line
+	linetype = "3313" #each digit represents the number of consecutive pixels
+		#alternates "on/off"
+		#3313 would be 3 on, 3 off, 1 on, 3 off
+		#ie ***   *   ***   *   ***   *   
+
+##Shapes
+#shape options 1-25
+https://www.sthda.com/english/wiki/ggplot2-point-shapes 
+
 ##change colors
 + scale_fill_manual(values=c())
 
@@ -144,5 +156,7 @@ ggplot(data, aes(x= , y= , color=as.factor( `grouping column` ))) +
 		## preventing bars from expanding to cover zero or null values at that x-value
 		## fixing bar width
 		## managing multiple legends
+		## shapes
+		## linetypes
 		## removing a specific legend
 		## adjusting aesthetics of the legend icons
