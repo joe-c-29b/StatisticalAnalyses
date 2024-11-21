@@ -16,11 +16,31 @@
 ##changing legend title
 + labs(fill="legend title")  #fill/color or whatever aspect the current legend is for  #basically, whatever you are using as your 3rd element, fill= or color=, that your legend is going to be describing
 
+##managing multiple legends
++ guides(color='', size='', linewidth='', fill='')
+	##removing a specific legend
+	+ guides(linewidth='none')
+	##adjusting aesthetics of the legend icons
+	+ guides(variable=guide_legend(override.aes=list(parameter=)))
+	#change options
+		+ guides(color=guide_legend(override.aes=list(linewidth=1.5)) #linewidth as an example
+		guide_legend(theme(legend.title=element_text(size=, face="", color=""))) #change text size, color, or font of the legend title
+		guide_legend(title="", theme(legend.title.position="right/left/top/bottom")) #change the legend title position
+		guide_legend(theme(legend.text.position="right/left/top/bottom", legend.text=element_text(hjust=))) #change the legend label positions
+		guide_legend(override.aes=list(alpha=1)) #transparency
+		guide_legend(nrow=) #number of rows the legend will be formatted into
+		guide_legend(ncol=) #number of columns the legend will be formatted into
+		guide_legend(nrow=, theme=theme(legend.byrow=TRUE)) #how do you want the values to populate onto the legend
+		guide_legend(reverse=TRUE) #reverse the order of how the values populate the legend
+
 ##reordering a legend title & bar order
 df$colname <- factor(df$colname, levels=c('lvl1', 'lvl2', 'lvl3', 'lvl4'))  #this allows you to place the values in whatever order you want for your graph
 
 ##change colors
 + scale_fill_manual(values=c())
+
+##change linewidth scale
++ scale_linewidth(name=element_blank() or '', range=c(1.25,2))
 
 ##changing graph and axis titles
 + labs(title="graph title", y="y axis title", x="x axis title")
@@ -70,8 +90,12 @@ df$colname <- factor(df$colname, levels=c('lvl1', 'lvl2', 'lvl3', 'lvl4'))  #thi
 	+ geom_text(aes(fontface=2))
 	# change font
 	+ geom_text(family="Times New Roman")
-	# same as text, but adds a rectangle around annotation
-	+ geom_label()
++ annotate()
+	# manually placing a point on a graph
+	+ annotate(geom="point", x=, y=, size=, color='')
+	# adding text labels at one location
+	+ annotate(geom="text", label="labelText", x=, y=, color='')
++ geom_label(label=, nudge_x =, nudge_y =, check_overlap=T, label.padding=unit(padding=,"lines"), label_size=, color=, fill=)
 	# more info http://www.sthda.com/english/wiki/ggplot2-texts-add-text-annotations-to-a-graph-in-r-software
 
 ##making rounded bar graphs
@@ -97,9 +121,9 @@ ggplot(data, aes(x= , y= , color=as.factor( `grouping column` ))) +
   geom_line(stat="identity")
 
 	##functions used: +theme(), +labs(), +scale_fill_manual(), +scale_x_continuous(), +scale_y_continuous(), geom_bar(), geom_chicklet(), geom_smooth(), scale_y_reverse(), scale_x_reverse(), ggtitle(), geom_line(), factor(),
-		+geom_text(), +geom_annotate(), position_dodge()
+		+geom_text(), +geom_annotate(), position_dodge(), +guides(), +scale_linewidth(), +annotate(), +guide_legend()
 	##concepts involved:
-		##a dding a title
+		## adding a title
 		## removing legend
 		## removing axis labels
 		## changing legend label
@@ -119,3 +143,6 @@ ggplot(data, aes(x= , y= , color=as.factor( `grouping column` ))) +
 		## adding watermark
 		## preventing bars from expanding to cover zero or null values at that x-value
 		## fixing bar width
+		## managing multiple legends
+		## removing a specific legend
+		## adjusting aesthetics of the legend icons
