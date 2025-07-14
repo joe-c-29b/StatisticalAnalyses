@@ -21,3 +21,12 @@ library(tidyverse)
 df_list <- list(df1, df2, df3)      
 df_list %>% reduce(full_join, by='id')
 ```
+
+##how to concat/rbind 3 or more datasets together
+```{r}
+df_out -> do.call("rbind", list(DF1, DF2, DF3))
+  #or
+df_out -> bind_rows(DF1, DF2, DF3)
+  #or
+df_out -> bind_rows(DF1, DF2, DF3)
+```
