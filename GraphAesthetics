@@ -4,6 +4,9 @@
 ##adding a title
 + labs(title="titleText")
 
+##changeing the overall size of the graph's visual output
+{r fig.width=15, fig.height=3}
+
 ##removing legend
 + theme(legend.position='none') 
 
@@ -160,3 +163,4 @@ ggplot(data, aes(x= , y= , color=as.factor( `grouping column` ))) +
 		## linetypes
 		## removing a specific legend
 		## adjusting aesthetics of the legend icons
+		##changeing the overall size of the graph's visual output
