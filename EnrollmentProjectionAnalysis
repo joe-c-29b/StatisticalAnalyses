@@ -1,0 +1,1446 @@
+---
+title: "regressions+graphs_tidy"
+author: "JoeChristian"
+date: "2024-11-14"
+output: html_document
+---
+
+##library
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(lm.beta)
+```
+```{r}
+setwd("")
+df_ov <- read.csv("overall_data.csv")  
+df_al <- read.csv("al_data.csv")  
+preds <- data.frame(FY = c(2025,2026,2027,2028,2029,2030))
+```
+
+
+
+##simple prediction using the "B" Load and "AllStudents", still differentiated by IPEDS category though
+##second graph is the "simplest prediction model"
+```{r}
+all_ov <- df_ov %>% filter(REPORTING_RACE_ETHNICITY == 'AllStudents')
+all_B <- all_ov %>% filter(Load == 'B')
+all_BFT_reg <- lm(FirstTime ~ FY,all_B)
+all_BTI_reg <- lm(TransferIn ~ FY,all_B)
+all_BCo_reg <- lm(Continuing ~ FY,all_B)
+all_BDS_reg <- lm(DegSeeking ~ FY,all_B)
+BFT_pred <- predict(all_BFT_reg, preds, interval="prediction")
+BTI_pred <- predict(all_BTI_reg, preds, interval="prediction")
+BCo_pred <- predict(all_BCo_reg, preds, interval="prediction")
+BDS_pred <- predict(all_BDS_reg, preds, interval="prediction")
+
+#need fit, lwr, upr to all be in one column that will rbind with the previous year counts
+fit_all_BFT_pred <- cbind(preds, BFT_pred) %>% transmute(FY, Load = "B", Typ = "FirstTime--fit", cnt=fit, L_typ="fit")
+fit_all_BTI_pred <- cbind(preds, BTI_pred) %>% transmute(FY, Load = "B", Typ = "TransferIn--fit", cnt=fit, L_typ="fit")
+fit_all_BCo_pred <- cbind(preds, BCo_pred) %>% transmute(FY, Load = "B", Typ = "Continuing--fit", cnt=fit, L_typ="fit")
+fit_all_BDS_pred <- cbind(preds, BDS_pred) %>% transmute(FY, Load = "B", Typ = "DegSeeking--fit", cnt=fit, L_typ="fit")
+all_ov_pred_fit <- rbind(fit_all_BFT_pred,fit_all_BTI_pred,fit_all_BCo_pred)
+
+lwr_all_BFT_pred <- cbind(preds, BFT_pred) %>% transmute(FY, Load = "B", Typ = "FirstTime--lwr", cnt=lwr, L_typ="lwr")
+lwr_all_BTI_pred <- cbind(preds, BTI_pred) %>% transmute(FY, Load = "B", Typ = "TransferIn--lwr", cnt=lwr, L_typ="lwr")
+lwr_all_BCo_pred <- cbind(preds, BCo_pred) %>% transmute(FY, Load = "B", Typ = "Continuing--lwr", cnt=lwr, L_typ="lwr")
+lwr_all_BDS_pred <- cbind(preds, BDS_pred) %>% transmute(FY, Load = "B", Typ = "DegSeeking--lwr", cnt=lwr, L_typ="lwr")
+all_ov_pred_lwr <- rbind(lwr_all_BFT_pred,lwr_all_BTI_pred,lwr_all_BCo_pred)
+
+upr_all_BFT_pred <- cbind(preds, BFT_pred) %>% transmute(FY, Load = "B", Typ = "FirstTime--upr", cnt=upr, L_typ="upr")
+upr_all_BTI_pred <- cbind(preds, BTI_pred) %>% transmute(FY, Load = "B", Typ = "TransferIn--upr", cnt=upr, L_typ="upr")
+upr_all_BCo_pred <- cbind(preds, BCo_pred) %>% transmute(FY, Load = "B", Typ = "Continuing--upr", cnt=upr, L_typ="upr")
+upr_all_BDS_pred <- cbind(preds, BDS_pred) %>% transmute(FY, Load = "B", Typ = "DegSeeking--upr", cnt=upr, L_typ="upr")
+all_ov_pred_upr <- rbind(upr_all_BFT_pred,upr_all_BTI_pred,upr_all_BCo_pred)
+#DegreeSeeking grouping only for most simplistic prediction
+all_pred_BDS <- rbind(fit_all_BDS_pred,lwr_all_BDS_pred,upr_all_BDS_pred) 
+#FirstTime, Continuing, TransferIn groupings
+all_ov_pred <- rbind(all_ov_pred_fit,all_ov_pred_lwr,all_ov_pred_upr)
+
+
+#adding the previous observances to the predictions for concise lines
+all_ov_FT_fit <- all_B %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--fit", cnt=FirstTime, L_typ="fit")
+all_ov_TI_fit <- all_B %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--fit", cnt=TransferIn, L_typ="fit")
+all_ov_Co_fit <- all_B %>% transmute(FY=FY, Load=Load, Typ = "Continuing--fit", cnt=Continuing, L_typ="fit")
+all_ov_DS_fit <- all_B %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--fit", cnt=DegSeeking, L_typ="fit")
+all_ov_fit <- rbind(all_ov_FT_fit,all_ov_TI_fit,all_ov_Co_fit)
+
+all_ov_FT_lwr <- all_B %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--lwr", cnt=FirstTime, L_typ="lwr")
+all_ov_TI_lwr <- all_B %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--lwr", cnt=TransferIn, L_typ="lwr")
+all_ov_Co_lwr <- all_B %>% transmute(FY=FY, Load=Load, Typ = "Continuing--lwr", cnt=Continuing, L_typ="lwr")
+all_ov_DS_lwr <- all_B %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--lwr", cnt=DegSeeking, L_typ="lwr")
+all_ov_lwr <- rbind(all_ov_FT_lwr,all_ov_TI_lwr,all_ov_Co_lwr) 
+
+all_ov_FT_upr <- all_B %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--upr", cnt=FirstTime, L_typ="upr")
+all_ov_TI_upr <- all_B %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--upr", cnt=TransferIn, L_typ="upr")
+all_ov_Co_upr <- all_B %>% transmute(FY=FY, Load=Load, Typ = "Continuing--upr", cnt=Continuing, L_typ="upr")
+all_ov_DS_upr <- all_B %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--upr", cnt=DegSeeking, L_typ="upr")
+all_ov_upr <- rbind(all_ov_FT_upr,all_ov_TI_upr,all_ov_Co_upr) 
+#DegreeSeeking grouping only for most simplistic prediction
+all_ov_DS <- rbind(all_ov_DS_fit,all_ov_DS_lwr,all_ov_DS_upr) 
+#FirstTime, Continuing, TransferIn groupings
+all_ov_main <- rbind(all_ov_fit,all_ov_lwr,all_ov_upr)
+  
+all_trend <- rbind(all_ov_pred,all_ov_main)
+BDS_trend <- rbind(all_ov_DS,all_pred_BDS)
+
+all_trend_DS <- all_trend %>% group_by(FY, L_typ) %>% summarise(cnt2=sum(cnt), .groups = 'drop')
+
+var <- all_trend
+
+titel <- "All Student Enrollment Projection, by IPEDS category"
+#y-axis formatting
+ytitel <- "# of Students"
+yLimits <- c(0,3000)
+yBreaks <- c(0,500,1000,1500,2000,2500,3000,3500)
+yLabels <- c("0","500","1000","1500","2000","2500","3000","3500")
+#x-axis formatting
+xtitel <- "Fiscal Year"
+xLimits <- c(2015,2030)
+xBreaks <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x1 <- 2022
+Txt_y1 <- 1750
+
+#color scheme
+pred9sub3 = c('#8E0000','#D20000','#D20000','#0000C0','#0070C0','#0070C0','#476D1D','#659A2A','#659A2A')
+
+
+m_grf <- ggplot(var, aes(x=FY, y=cnt, color=Typ)) + 
+  geom_line(stat='identity', lineend="round") 
+m_grf +
+  labs(title=titel, y=ytitel, x=xtitel) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1)) +
+  scale_y_continuous(limits=yLimits, breaks=yBreaks, labels=yLabels) +     #y axis formatting
+  scale_color_manual(values=pred9sub3) +
+  geom_text(x=Txt_x1,y=Txt_y1, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits, breaks=xBreaks, labels=xLabels) #x axis formatting
+
+var2 <- BDS_trend
+
+titel2 <- "All Student Enrollment Projection, by IPEDS category"
+#y-axis formatting
+ytitel2 <- "# of Students"
+yLimits2 <- c(0,3000)
+yBreaks2 <- c(0,500,1000,1500,2000,2500,3000,3500)
+yLabels2 <- c("0","500","1000","1500","2000","2500","3000","3500")
+#x-axis formatting
+xtitel2 <- "Fiscal Year"
+xLimits2 <- c(2015,2030)
+xBreaks2 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels2 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x2 <- 2022
+Txt_y2 <- 1750
+
+#color scheme
+sub3 = c('#0000C0','#0070C0','#0070C0')
+
+
+m_grf2 <- ggplot(var2, aes(x=FY, y=cnt, color=Typ)) + 
+  geom_line(stat='identity', lineend="round") 
+m_grf2 +
+  labs(title=titel2, y=ytitel2, x=xtitel2) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1)) +
+  scale_y_continuous(limits=yLimits2, breaks=yBreaks2, labels=yLabels2) +     #y axis formatting
+  scale_color_manual(values=sub3) +
+  geom_text(x=Txt_x2,y=Txt_y2, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits2, breaks=xBreaks2, labels=xLabels2) #x axis formatting
+
+var3 <- all_trend_DS
+
+titel3 <- "All Student Enrollment Projection, by Combined IPEDS category trends"
+#y-axis formatting
+ytitel3 <- "# of Students"
+yLimits3 <- c(0,3000)
+yBreaks3 <- c(0,500,1000,1500,2000,2500,3000,3500)
+yLabels3 <- c("0","500","1000","1500","2000","2500","3000","3500")
+#x-axis formatting
+xtitel3 <- "Fiscal Year"
+xLimits3 <- c(2015,2030)
+xBreaks3 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels3 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x3 <- 2022
+Txt_y3 <- 1750
+
+#color scheme
+sub3 = c('#0000C0','#0070C0','#0070C0')
+
+
+m_grf3 <- ggplot(var3, aes(x=FY, y=cnt2, color=L_typ)) + 
+  geom_line(stat='identity', lineend="round") 
+m_grf3 +
+  labs(title=titel3, y=ytitel3, x=xtitel3) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1)) +
+  scale_y_continuous(limits=yLimits3, breaks=yBreaks3, labels=yLabels3) +     #y axis formatting
+  scale_color_manual(values=sub3) +
+  geom_text(x=Txt_x3,y=Txt_y3, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits3, breaks=xBreaks3, labels=xLabels3) #x axis formatting
+```
+
+##all students prediction using Each IPEDS category, breaking out FT and PT course Loads 
+```{r}
+##Full Time
+all_ov <- df_ov %>% filter(REPORTING_RACE_ETHNICITY == 'AllStudents')
+all_FT <- all_ov %>% filter(Load == 'FT')
+all_FTFT_reg <- lm(FirstTime ~ FY,all_FT)
+all_FTTI_reg <- lm(TransferIn ~ FY,all_FT)
+all_FTCo_reg <- lm(Continuing ~ FY,all_FT)
+all_FTDS_reg <- lm(DegSeeking ~ FY,all_FT)
+FTFT_pred <- predict(all_FTFT_reg, preds, interval="prediction")
+FTTI_pred <- predict(all_FTTI_reg, preds, interval="prediction")
+FTCo_pred <- predict(all_FTCo_reg, preds, interval="prediction")
+FTDS_pred <- predict(all_FTDS_reg, preds, interval="prediction")
+
+#need fit, lwr, upr to all be in one column that will rbind with the previous year counts
+fit_all_FTFT_pred <- cbind(preds, FTFT_pred) %>% transmute(FY, Load = "FT", Typ = "FirstTime--fit", cnt=fit, L_typ="fit")
+fit_all_FTTI_pred <- cbind(preds, FTTI_pred) %>% transmute(FY, Load = "FT", Typ = "TransferIn--fit", cnt=fit, L_typ="fit")
+fit_all_FTCo_pred <- cbind(preds, FTCo_pred) %>% transmute(FY, Load = "FT", Typ = "Continuing--fit", cnt=fit, L_typ="fit")
+fit_all_FTDS_pred <- cbind(preds, FTDS_pred) %>% transmute(FY, Load = "FT", Typ = "DegSeeking--fit", cnt=fit, L_typ="fit")
+FTall_ov_pred_fit <- rbind(fit_all_FTFT_pred,fit_all_FTTI_pred,fit_all_FTCo_pred)
+
+lwr_all_FTFT_pred <- cbind(preds, FTFT_pred) %>% transmute(FY, Load = "FT", Typ = "FirstTime--lwr", cnt=lwr, L_typ="lwr")
+lwr_all_FTTI_pred <- cbind(preds, FTTI_pred) %>% transmute(FY, Load = "FT", Typ = "TransferIn--lwr", cnt=lwr, L_typ="lwr")
+lwr_all_FTCo_pred <- cbind(preds, FTCo_pred) %>% transmute(FY, Load = "FT", Typ = "Continuing--lwr", cnt=lwr, L_typ="lwr")
+lwr_all_FTDS_pred <- cbind(preds, FTDS_pred) %>% transmute(FY, Load = "FT", Typ = "DegSeeking--lwr", cnt=lwr, L_typ="lwr")
+FTall_ov_pred_lwr <- rbind(lwr_all_FTFT_pred,lwr_all_FTTI_pred,lwr_all_FTCo_pred)
+
+upr_all_FTFT_pred <- cbind(preds, FTFT_pred) %>% transmute(FY, Load = "FT", Typ = "FirstTime--upr", cnt=upr, L_typ="upr")
+upr_all_FTTI_pred <- cbind(preds, FTTI_pred) %>% transmute(FY, Load = "FT", Typ = "TransferIn--upr", cnt=upr, L_typ="upr")
+upr_all_FTCo_pred <- cbind(preds, FTCo_pred) %>% transmute(FY, Load = "FT", Typ = "Continuing--upr", cnt=upr, L_typ="upr")
+upr_all_FTDS_pred <- cbind(preds, FTDS_pred) %>% transmute(FY, Load = "FT", Typ = "DegSeeking--upr", cnt=upr, L_typ="upr")
+FTall_ov_pred_upr <- rbind(upr_all_FTFT_pred,upr_all_FTTI_pred,upr_all_FTCo_pred)
+#DegreeSeeking grouping only for most simplistic prediction
+FTall_pred_FTDS <- rbind(fit_all_FTDS_pred,lwr_all_FTDS_pred,upr_all_FTDS_pred) 
+#FirstTime, Continuing, TransferIn groupings
+FTall_ov_pred <- rbind(FTall_ov_pred_fit,FTall_ov_pred_lwr,FTall_ov_pred_upr)
+
+
+#adding the previous observances to the predictions for concise lines
+FTall_ov_FT_fit <- all_FT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--fit", cnt=FirstTime, L_typ="fit")
+FTall_ov_TI_fit <- all_FT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--fit", cnt=TransferIn, L_typ="fit")
+FTall_ov_Co_fit <- all_FT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--fit", cnt=Continuing, L_typ="fit")
+FTall_ov_DS_fit <- all_FT %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--fit", cnt=DegSeeking, L_typ="fit")
+FTall_ov_fit <- rbind(FTall_ov_FT_fit,FTall_ov_TI_fit,FTall_ov_Co_fit)
+
+FTall_ov_FT_lwr <- all_FT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--lwr", cnt=FirstTime, L_typ="lwr")
+FTall_ov_TI_lwr <- all_FT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--lwr", cnt=TransferIn, L_typ="lwr")
+FTall_ov_Co_lwr <- all_FT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--lwr", cnt=Continuing, L_typ="lwr")
+FTall_ov_DS_lwr <- all_FT %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--lwr", cnt=DegSeeking, L_typ="lwr")
+FTall_ov_lwr <- rbind(FTall_ov_FT_lwr,FTall_ov_TI_lwr,FTall_ov_Co_lwr) 
+
+FTall_ov_FT_upr <- all_FT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--upr", cnt=FirstTime, L_typ="upr")
+FTall_ov_TI_upr <- all_FT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--upr", cnt=TransferIn, L_typ="upr")
+FTall_ov_Co_upr <- all_FT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--upr", cnt=Continuing, L_typ="upr")
+FTall_ov_DS_upr <- all_FT %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--upr", cnt=DegSeeking, L_typ="upr")
+FTall_ov_upr <- rbind(FTall_ov_FT_upr,FTall_ov_TI_upr,FTall_ov_Co_upr) 
+#DegreeSeeking grouping only for most simplistic prediction
+FTall_ov_DS <- rbind(FTall_ov_DS_fit,FTall_ov_DS_lwr,FTall_ov_DS_upr) 
+#FirstTime, Continuing, TransferIn groupings
+FTall_ov_main <- rbind(FTall_ov_fit,FTall_ov_lwr,FTall_ov_upr)
+  
+FTall_trend <- rbind(FTall_ov_pred,FTall_ov_main)
+FTBDS_trend <- rbind(FTall_ov_DS,FTall_pred_FTDS)
+
+FTall_trend_DS <- FTall_trend %>% group_by(FY, L_typ) %>% summarise(cnt2=sum(cnt), .groups = 'drop')
+
+
+
+var <- FTall_trend
+
+titel <- "All Student Enrollment Projection, by IPEDS category"
+#y-axis formatting
+ytitel <- "# of Students"
+yLimits <- c(0,800)
+yBreaks <- c(0,100,200,300,400,500,600,700,800)
+yLabels <- c("0","100","200","300","400","500","600","700","800")
+#x-axis formatting
+xtitel <- "Fiscal Year"
+xLimits <- c(2015,2030)
+xBreaks <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x1 <- 2022
+Txt_y1 <- 400
+
+#color scheme
+pred9sub3 = c('#8E0000','#D20000','#D20000','#0000C0','#0070C0','#0070C0','#476D1D','#659A2A','#659A2A')
+
+
+m_grf <- ggplot(var, aes(x=FY, y=cnt, color=Typ)) + 
+  geom_line(stat='identity', lineend="round") 
+m_grf +
+  labs(title=titel, y=ytitel, x=xtitel) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1)) +
+  scale_y_continuous(limits=yLimits, breaks=yBreaks, labels=yLabels) +     #y axis formatting
+  scale_color_manual(values=pred9sub3) +
+  geom_text(x=Txt_x1,y=Txt_y1, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits, breaks=xBreaks, labels=xLabels) #x axis formatting
+
+var2 <- FTBDS_trend
+
+titel2 <- "All Full-Time Degree-Seeking Student Enrollment Projection"
+#y-axis formatting
+ytitel2 <- "# of Students"
+yLimits2 <- c(0,1300)
+yBreaks2 <- c(0,100,200,300,400,500,600,700,800,900,1000,1100,1200,1300)
+yLabels2 <- c("0","100","200","300","400","500","600","700","800","900","1000","1100","1200","1300")
+#x-axis formatting
+xtitel2 <- "Fiscal Year"
+xLimits2 <- c(2015,2030)
+xBreaks2 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels2 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x2 <- 2022
+Txt_y2 <- 650
+
+#color scheme
+sub3 = c('#0000C0','#0070C0','#0070C0')
+
+
+m_grf2 <- ggplot(var2, aes(x=FY, y=cnt, color=Typ)) + 
+  geom_line(stat='identity', lineend="round") 
+m_grf2 +
+  labs(title=titel2, y=ytitel2, x=xtitel2) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1)) +
+  scale_y_continuous(limits=yLimits2, breaks=yBreaks2, labels=yLabels2) +     #y axis formatting
+  scale_color_manual(values=sub3) +
+  geom_text(x=Txt_x2,y=Txt_y2, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits2, breaks=xBreaks2, labels=xLabels2) #x axis formatting
+
+var3 <- FTall_trend_DS
+
+titel3 <- "All Full-Time Student Enrollment Projection, by Combined IPEDS category trends"
+#y-axis formatting
+ytitel3 <- "# of Students"
+yLimits3 <- c(0,1300)
+yBreaks3 <- c(0,100,200,300,400,500,600,700,800,900,1000,1100,1200,1300)
+yLabels3 <- c("0","100","200","300","400","500","600","700","800","900","1000","1100","1200","1300")
+#x-axis formatting
+xtitel3 <- "Fiscal Year"
+xLimits3 <- c(2015,2030)
+xBreaks3 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels3 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x3 <- 2022
+Txt_y3 <- 650
+
+#color scheme
+sub3 = c('#0000C0','#0070C0','#0070C0')
+
+
+m_grf3 <- ggplot(var3, aes(x=FY, y=cnt2, color=L_typ)) + 
+  geom_line(stat='identity', lineend="round") 
+m_grf3 +
+  labs(title=titel3, y=ytitel3, x=xtitel3) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1)) +
+  scale_y_continuous(limits=yLimits3, breaks=yBreaks3, labels=yLabels3) +     #y axis formatting
+  scale_color_manual(values=sub3) +
+  geom_text(x=Txt_x3,y=Txt_y3, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits3, breaks=xBreaks3, labels=xLabels3) #x axis formatting
+
+```
+
+```{r}
+##Part Time
+all_ov <- df_ov %>% filter(REPORTING_RACE_ETHNICITY == 'AllStudents')
+all_PT <- all_ov %>% filter(Load == 'PT')
+all_PTFT_reg <- lm(FirstTime ~ FY,all_PT)
+all_PTTI_reg <- lm(TransferIn ~ FY,all_PT)
+all_PTCo_reg <- lm(Continuing ~ FY,all_PT)
+all_PTDS_reg <- lm(DegSeeking ~ FY,all_PT)
+PTFT_pred <- predict(all_PTFT_reg, preds, interval="prediction")
+PTTI_pred <- predict(all_PTTI_reg, preds, interval="prediction")
+PTCo_pred <- predict(all_PTCo_reg, preds, interval="prediction")
+PTDS_pred <- predict(all_PTDS_reg, preds, interval="prediction")
+
+#need fit, lwr, upr to all be in one column that will rbind with the previous year counts
+fit_all_PTFT_pred <- cbind(preds, PTFT_pred) %>% transmute(FY, Load = "PT", Typ = "FirstTime--fit", cnt=fit, L_typ="fit")
+fit_all_PTTI_pred <- cbind(preds, PTTI_pred) %>% transmute(FY, Load = "PT", Typ = "TransferIn--fit", cnt=fit, L_typ="fit")
+fit_all_PTCo_pred <- cbind(preds, PTCo_pred) %>% transmute(FY, Load = "PT", Typ = "Continuing--fit", cnt=fit, L_typ="fit")
+fit_all_PTDS_pred <- cbind(preds, PTDS_pred) %>% transmute(FY, Load = "PT", Typ = "DegSeeking--fit", cnt=fit, L_typ="fit")
+PTall_ov_pred_fit <- rbind(fit_all_PTFT_pred,fit_all_PTTI_pred,fit_all_PTCo_pred)
+
+lwr_all_PTFT_pred <- cbind(preds, PTFT_pred) %>% transmute(FY, Load = "PT", Typ = "FirstTime--lwr", cnt=lwr, L_typ="lwr")
+lwr_all_PTTI_pred <- cbind(preds, PTTI_pred) %>% transmute(FY, Load = "PT", Typ = "TransferIn--lwr", cnt=lwr, L_typ="lwr")
+lwr_all_PTCo_pred <- cbind(preds, PTCo_pred) %>% transmute(FY, Load = "PT", Typ = "Continuing--lwr", cnt=lwr, L_typ="lwr")
+lwr_all_PTDS_pred <- cbind(preds, PTDS_pred) %>% transmute(FY, Load = "PT", Typ = "DegSeeking--lwr", cnt=lwr, L_typ="lwr")
+PTall_ov_pred_lwr <- rbind(lwr_all_PTFT_pred,lwr_all_PTTI_pred,lwr_all_PTCo_pred)
+
+upr_all_PTFT_pred <- cbind(preds, PTFT_pred) %>% transmute(FY, Load = "PT", Typ = "FirstTime--upr", cnt=upr, L_typ="upr")
+upr_all_PTTI_pred <- cbind(preds, PTTI_pred) %>% transmute(FY, Load = "PT", Typ = "TransferIn--upr", cnt=upr, L_typ="upr")
+upr_all_PTCo_pred <- cbind(preds, PTCo_pred) %>% transmute(FY, Load = "PT", Typ = "Continuing--upr", cnt=upr, L_typ="upr")
+upr_all_PTDS_pred <- cbind(preds, PTDS_pred) %>% transmute(FY, Load = "PT", Typ = "DegSeeking--upr", cnt=upr, L_typ="upr")
+PTall_ov_pred_upr <- rbind(upr_all_PTFT_pred,upr_all_PTTI_pred,upr_all_PTCo_pred)
+#DegreeSeeking grouping only for most simplistic prediction
+PTall_pred_PTDS <- rbind(fit_all_PTDS_pred,lwr_all_PTDS_pred,upr_all_PTDS_pred) 
+#FirstTime, Continuing, TransferIn groupings
+PTall_ov_pred <- rbind(PTall_ov_pred_fit,PTall_ov_pred_lwr,PTall_ov_pred_upr)
+
+
+#adding the previous observances to the predictions for concise lines
+PTall_ov_FT_fit <- all_PT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--fit", cnt=FirstTime, L_typ="fit")
+PTall_ov_TI_fit <- all_PT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--fit", cnt=TransferIn, L_typ="fit")
+PTall_ov_Co_fit <- all_PT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--fit", cnt=Continuing, L_typ="fit")
+PTall_ov_DS_fit <- all_PT %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--fit", cnt=DegSeeking, L_typ="fit")
+PTall_ov_fit <- rbind(PTall_ov_FT_fit,PTall_ov_TI_fit,PTall_ov_Co_fit)
+
+PTall_ov_FT_lwr <- all_PT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--lwr", cnt=FirstTime, L_typ="lwr")
+PTall_ov_TI_lwr <- all_PT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--lwr", cnt=TransferIn, L_typ="lwr")
+PTall_ov_Co_lwr <- all_PT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--lwr", cnt=Continuing, L_typ="lwr")
+PTall_ov_DS_lwr <- all_PT %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--lwr", cnt=DegSeeking, L_typ="lwr")
+PTall_ov_lwr <- rbind(PTall_ov_FT_lwr,PTall_ov_TI_lwr,PTall_ov_Co_lwr) 
+
+PTall_ov_FT_upr <- all_PT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--upr", cnt=FirstTime, L_typ="upr")
+PTall_ov_TI_upr <- all_PT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--upr", cnt=TransferIn, L_typ="upr")
+PTall_ov_Co_upr <- all_PT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--upr", cnt=Continuing, L_typ="upr")
+PTall_ov_DS_upr <- all_PT %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--upr", cnt=DegSeeking, L_typ="upr")
+PTall_ov_upr <- rbind(PTall_ov_FT_upr,PTall_ov_TI_upr,PTall_ov_Co_upr) 
+#DegreeSeeking grouping only for most simplistic prediction
+PTall_ov_DS <- rbind(PTall_ov_DS_fit,PTall_ov_DS_lwr,PTall_ov_DS_upr) 
+#FirstTime, Continuing, TransferIn groupings
+PTall_ov_main <- rbind(PTall_ov_fit,PTall_ov_lwr,PTall_ov_upr)
+  
+PTall_trend <- rbind(PTall_ov_pred,PTall_ov_main)
+PTBDS_trend <- rbind(PTall_ov_DS,PTall_pred_PTDS)
+
+PTall_trend_DS <- PTall_trend %>% group_by(FY, L_typ) %>% summarise(cnt2=sum(cnt), .groups = 'drop')
+
+
+
+var4 <- PTall_trend
+
+titel4 <- "All Part-Time Student Enrollment Projection, by IPEDS category"
+#y-axis formatting
+ytitel4 <- "# of Students"
+yLimits4 <- c(0,1500)
+yBreaks4 <- c(0,100,200,300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500)
+yLabels4 <- c("0","100","200","300","400","500","600","700","800","900","1000","1100","1200","1300","1400","1500")
+#x-axis formatting
+xtitel4 <- "Fiscal Year"
+xLimits4 <- c(2015,2030)
+xBreaks4 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels4 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x4 <- 2022
+Txt_y4 <- 400
+
+#color scheme
+pred9sub3 = c('#8E0000','#D20000','#D20000','#0000C0','#0070C0','#0070C0','#476D1D','#659A2A','#659A2A')
+
+
+m_grf4 <- ggplot(var4, aes(x=FY, y=cnt, color=Typ)) + 
+  geom_line(stat='identity', lineend="round") 
+m_grf4 +
+  labs(title=titel4, y=ytitel4, x=xtitel4) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1)) +
+  scale_y_continuous(limits=yLimits4, breaks=yBreaks4, labels=yLabels4) +     #y axis formatting
+  scale_color_manual(values=pred9sub3) +
+  geom_text(x=Txt_x4,y=Txt_y4, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits4, breaks=xBreaks4, labels=xLabels4) #x axis formatting
+
+var5 <- PTBDS_trend
+
+titel5 <- "All Part-Time Degree-Seeking Student Enrollment Projection"
+#y-axis formatting
+ytitel5 <- "# of Students"
+yLimits5 <- c(0,2000)
+yBreaks5 <- c(0,200,400,600,800,1000,1200,1400,1600,1800,2000)
+yLabels5 <- c("0","200","400","600","800","1000","1200","1400","1600","1800","2000")
+#x-axis formatting
+xtitel5 <- "Fiscal Year"
+xLimits5 <- c(2015,2030)
+xBreaks5 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels5 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x5 <- 2022
+Txt_y5 <- 650
+
+#color scheme
+sub3 = c('#0000C0','#0070C0','#0070C0')
+
+
+m_grf5 <- ggplot(var5, aes(x=FY, y=cnt, color=Typ)) + 
+  geom_line(stat='identity', lineend="round") 
+m_grf5 +
+  labs(title=titel5, y=ytitel5, x=xtitel5) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1)) +
+  scale_y_continuous(limits=yLimits5, breaks=yBreaks5, labels=yLabels5) +     #y axis formatting
+  scale_color_manual(values=sub3) +
+  geom_text(x=Txt_x5,y=Txt_y5, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits5, breaks=xBreaks5, labels=xLabels5) #x axis formatting
+
+var6 <- PTall_trend_DS
+
+titel6 <- "All Part-Time Student Enrollment Projection, by Combined IPEDS category trends"
+#y-axis formatting
+ytitel6 <- "# of Students"
+yLimits6 <- c(0,2000)
+yBreaks6 <- c(0,200,400,600,800,1000,1200,1400,1600,1800,2000)
+yLabels6 <- c("0","200","400","600","800","1000","1200","1400","1600","1800","2000")
+#x-axis formatting
+xtitel6 <- "Fiscal Year"
+xLimits6 <- c(2015,2030)
+xBreaks6 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels6 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x6 <- 2022
+Txt_y6 <- 650
+
+#color scheme
+sub3 = c('#0000C0','#0070C0','#0070C0')
+
+
+m_grf6 <- ggplot(var6, aes(x=FY, y=cnt2, color=L_typ)) + 
+  geom_line(stat='identity', lineend="round") 
+m_grf6 +
+  labs(title=titel6, y=ytitel6, x=xtitel6) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1)) +
+  scale_y_continuous(limits=yLimits6, breaks=yBreaks6, labels=yLabels6) +     #y axis formatting
+  scale_color_manual(values=sub3) +
+  geom_text(x=Txt_x6,y=Txt_y6, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits6, breaks=xBreaks6, labels=xLabels6) #x axis formatting
+```
+
+
+##combined Part Time and Full Time predictions
+```{r}
+combined <- rbind(FTall_trend,PTall_trend) %>% group_by(FY, Typ, L_typ) %>% summarise(cnt2=sum(cnt), .groups='drop')
+combined_BDS_trend <- rbind(FTBDS_trend,PTBDS_trend) %>% group_by(FY, L_typ) %>% summarise(cnt2=sum(cnt), .groups='drop')
+combined_trend_DS <- combined %>% group_by(FY, L_typ) %>% summarise(cnt3=sum(cnt2), .groups='drop')
+
+var7 <- combined
+
+titel7 <- "Part&Full-Time Student Enrollment Projection, by IPEDS category"
+#y-axis formatting
+ytitel7 <- "# of Students"
+yLimits7 <- c(0,2200)
+yBreaks7 <- c(0,200,400,600,800,1000,1200,1400,1600,1800,2000,2200)
+yLabels7 <- c(0,200,400,600,800,1000,1200,1400,1600,1800,2000,2200)
+#x-axis formatting
+xtitel7 <- "Fiscal Year"
+xLimits7 <- c(2015,2030)
+xBreaks7 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels7 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x7 <- 2022
+Txt_y7 <- 1500
+
+#color scheme
+pred9sub3 = c('#8E0000','#D20000','#D20000','#0000C0','#0070C0','#0070C0','#476D1D','#659A2A','#659A2A')
+
+
+m_grf7 <- ggplot(var7, aes(x=FY, y=cnt2, color=Typ)) + 
+  geom_line(stat='identity', lineend="round") 
+m_grf7 +
+  labs(title=titel7, y=ytitel7, x=xtitel7) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1)) +
+  scale_y_continuous(limits=yLimits7, breaks=yBreaks7, labels=yLabels7) +     #y axis formatting
+  scale_color_manual(values=pred9sub3) +
+  geom_text(x=Txt_x7,y=Txt_y7, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits7, breaks=xBreaks7, labels=xLabels7) #x axis formatting
+
+var8 <- combined_BDS_trend
+
+titel8 <- "Part&Full-Time Degree-Seeking Student Enrollment Projection"
+#y-axis formatting
+ytitel8 <- "# of Students"
+yLimits8 <- c(0,3500)
+yBreaks8 <- c(0,500,1000,1500,2000,2500,3000,3500)
+yLabels8 <- c(0,500,1000,1500,2000,2500,3000,3500)
+#x-axis formatting
+xtitel8 <- "Fiscal Year"
+xLimits8 <- c(2015,2030)
+xBreaks8 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels8 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x8 <- 2022
+Txt_y8 <- 1500
+
+#color scheme
+sub3 = c('#0000C0','#0070C0','#0070C0')
+
+
+m_grf8 <- ggplot(var8, aes(x=FY, y=cnt2, color=L_typ)) + 
+  geom_line(stat='identity', lineend="round") 
+m_grf8 +
+  labs(title=titel8, y=ytitel8, x=xtitel8) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1)) +
+  scale_y_continuous(limits=yLimits8, breaks=yBreaks8, labels=yLabels8) +     #y axis formatting
+  scale_color_manual(values=sub3) +
+  geom_text(x=Txt_x8,y=Txt_y8, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits8, breaks=xBreaks8, labels=xLabels8) #x axis formatting
+
+var9 <- combined_trend_DS
+
+titel9 <- "Part&Full-Time Student Enrollment Projection, by Combined IPEDS category trends"
+#y-axis formatting
+ytitel9 <- "# of Students"
+yLimits9 <- c(0,3500)
+yBreaks9 <- c(0,500,1000,1500,2000,2500,3000,3500)
+yLabels9 <- c(0,500,1000,1500,2000,2500,3000,3500)
+#x-axis formatting
+xtitel9 <- "Fiscal Year"
+xLimits9 <- c(2015,2030)
+xBreaks9 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels9 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x9 <- 2022
+Txt_y9 <- 1500
+
+#color scheme
+sub3 = c('#0000C0','#0070C0','#0070C0')
+
+
+m_grf9 <- ggplot(var9, aes(x=FY, y=cnt3, color=L_typ)) + 
+  geom_line(stat='identity', lineend="round") 
+m_grf9 +
+  labs(title=titel9, y=ytitel9, x=xtitel9) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1)) +
+  scale_y_continuous(limits=yLimits9, breaks=yBreaks9, labels=yLabels9) +     #y axis formatting
+  scale_color_manual(values=sub3) +
+  geom_text(x=Txt_x9,y=Txt_y9, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits9, breaks=xBreaks9, labels=xLabels9) #x axis formatting
+```
+
+##combined complex complete growth model
+```{r}
+##
+#White Part-Time Students
+##
+wh_PT <- df_ov %>% filter(Load=='PT' & REPORTING_RACE_ETHNICITY=='White')
+wh_PT2 <- wh_PT %>% filter(FY > 2018)
+wh_PT3 <- wh_PT %>% filter(FY > 2019)
+wh_PTFTmodel <- lm(FirstTime ~ FY,wh_PT3)
+wh_PTTImodel <- lm(TransferIn ~ FY,wh_PT2)
+wh_PTComodel <- lm(Continuing ~ FY,wh_PT)
+
+wh_PTFTpreds <- predict(wh_PTFTmodel, preds, interval="prediction")
+wh_PTTIpreds <- predict(wh_PTTImodel, preds, interval="prediction")
+wh_PTCopreds <- predict(wh_PTComodel, preds, interval="prediction")
+
+#bind predictions to their corresponding year
+wh_PTFTfit <- cbind(preds, wh_PTFTpreds) %>% transmute(FY, Load = "PT", Typ = "FirstTime--fit", cnt=fit, L_typ="fit")
+wh_PTTIfit <- cbind(preds, wh_PTTIpreds) %>% transmute(FY, Load = "PT", Typ = "TransferIn--fit", cnt=fit, L_typ="fit")
+wh_PTCofit <- cbind(preds, wh_PTCopreds) %>% transmute(FY, Load = "PT", Typ = "Continuing--fit", cnt=fit, L_typ="fit")
+wh_PTfit <- rbind(wh_PTFTfit,wh_PTTIfit,wh_PTCofit)
+wh_PTFTlwr <- cbind(preds, wh_PTFTpreds) %>% transmute(FY, Load = "PT", Typ = "FirstTime--lwr", cnt=lwr, L_typ="lwr")
+wh_PTTIlwr <- cbind(preds, wh_PTTIpreds) %>% transmute(FY, Load = "PT", Typ = "TransferIn--lwr", cnt=lwr, L_typ="lwr")
+wh_PTColwr <- cbind(preds, wh_PTCopreds) %>% transmute(FY, Load = "PT", Typ = "Continuing--lwr", cnt=lwr, L_typ="lwr")
+wh_PTlwr <- rbind(wh_PTFTlwr,wh_PTTIlwr,wh_PTColwr)
+wh_PTFTupr <- cbind(preds, wh_PTFTpreds) %>% transmute(FY, Load = "PT", Typ = "FirstTime--upr", cnt=upr, L_typ="upr")
+wh_PTTIupr <- cbind(preds, wh_PTTIpreds) %>% transmute(FY, Load = "PT", Typ = "TransferIn--upr", cnt=upr, L_typ="upr")
+wh_PTCoupr <- cbind(preds, wh_PTCopreds) %>% transmute(FY, Load = "PT", Typ = "Continuing--upr", cnt=upr, L_typ="upr")
+wh_PTupr <- rbind(wh_PTFTupr,wh_PTTIupr,wh_PTCoupr)
+wh_PTpred_bind <- rbind(wh_PTfit,wh_PTlwr,wh_PTupr)
+
+#format previous observances into something bindable to the predictions
+wh_PTFT_fit <- wh_PT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--fit", cnt=FirstTime, L_typ="fit")
+wh_PTTI_fit <- wh_PT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--fit", cnt=TransferIn, L_typ="fit")
+wh_PTCo_fit <- wh_PT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--fit", cnt=Continuing, L_typ="fit")
+wh_PT_fit <- rbind(wh_PTFT_fit,wh_PTTI_fit,wh_PTCo_fit)
+wh_PTFT_lwr <- wh_PT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--lwr", cnt=FirstTime, L_typ="lwr")
+wh_PTTI_lwr <- wh_PT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--lwr", cnt=TransferIn, L_typ="lwr")
+wh_PTCo_lwr <- wh_PT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--lwr", cnt=Continuing, L_typ="lwr")
+wh_PT_lwr <- rbind(wh_PTFT_lwr,wh_PTTI_lwr,wh_PTCo_lwr)
+wh_PTFT_upr <- wh_PT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--upr", cnt=FirstTime, L_typ="upr")
+wh_PTTI_upr <- wh_PT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--upr", cnt=TransferIn, L_typ="upr")
+wh_PTCo_upr <- wh_PT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--upr", cnt=Continuing, L_typ="upr")
+wh_PT_upr <- rbind(wh_PTFT_upr,wh_PTTI_upr,wh_PTCo_upr)
+wh_PTobserve_bind <- rbind(wh_PT_fit,wh_PT_lwr,wh_PT_upr)
+
+#put them all together into one useable DF
+wh_PT_bound <- rbind(wh_PTpred_bind,wh_PTobserve_bind)  #just for a graph, not for the actual model
+wh_PT_bound_grouped <- rbind(wh_PTpred_bind,wh_PTobserve_bind) %>% group_by(FY, L_typ) %>% summarise(cnt2=sum(cnt), .groups = 'drop') %>% mutate(grp="White_PT")
+
+
+##
+#White Full-Time Students
+##
+wh_FT <- df_ov %>% filter(Load=='FT' & REPORTING_RACE_ETHNICITY=='White')
+wh_FTFTmodel <- lm(FirstTime ~ FY,wh_FT)
+wh_FTTImodel <- lm(TransferIn ~ FY,wh_FT)
+wh_FTComodel <- lm(Continuing ~ FY,wh_FT)
+
+wh_FTFTpreds <- predict(wh_FTFTmodel, preds, interval="prediction")
+wh_FTTIpreds <- predict(wh_FTTImodel, preds, interval="prediction")
+wh_FTCopreds <- predict(wh_FTComodel, preds, interval="prediction")
+
+#bind predictions to their corresponding year
+wh_FTFTfit <- cbind(preds, wh_FTFTpreds) %>% transmute(FY, Load = "FT", Typ = "FirstTime--fit", cnt=fit, L_typ="fit")
+wh_FTTIfit <- cbind(preds, wh_FTTIpreds) %>% transmute(FY, Load = "FT", Typ = "TransferIn--fit", cnt=fit, L_typ="fit")
+wh_FTCofit <- cbind(preds, wh_FTCopreds) %>% transmute(FY, Load = "FT", Typ = "Continuing--fit", cnt=fit, L_typ="fit")
+wh_FTfit <- rbind(wh_FTFTfit,wh_FTTIfit,wh_FTCofit)
+wh_FTFTlwr <- cbind(preds, wh_FTFTpreds) %>% transmute(FY, Load = "FT", Typ = "FirstTime--lwr", cnt=lwr, L_typ="lwr")
+wh_FTTIlwr <- cbind(preds, wh_FTTIpreds) %>% transmute(FY, Load = "FT", Typ = "TransferIn--lwr", cnt=lwr, L_typ="lwr")
+wh_FTColwr <- cbind(preds, wh_FTCopreds) %>% transmute(FY, Load = "FT", Typ = "Continuing--lwr", cnt=lwr, L_typ="lwr")
+wh_FTlwr <- rbind(wh_FTFTlwr,wh_FTTIlwr,wh_FTColwr)
+wh_FTFTupr <- cbind(preds, wh_FTFTpreds) %>% transmute(FY, Load = "FT", Typ = "FirstTime--upr", cnt=upr, L_typ="upr")
+wh_FTTIupr <- cbind(preds, wh_FTTIpreds) %>% transmute(FY, Load = "FT", Typ = "TransferIn--upr", cnt=upr, L_typ="upr")
+wh_FTCoupr <- cbind(preds, wh_FTCopreds) %>% transmute(FY, Load = "FT", Typ = "Continuing--upr", cnt=upr, L_typ="upr")
+wh_FTupr <- rbind(wh_FTFTupr,wh_FTTIupr,wh_FTCoupr)
+wh_FTpred_bind <- rbind(wh_FTfit,wh_FTlwr,wh_FTupr)
+
+#format previous observances into something bindable to the predictions
+wh_FTFT_fit <- wh_FT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--fit", cnt=FirstTime, L_typ="fit")
+wh_FTTI_fit <- wh_FT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--fit", cnt=TransferIn, L_typ="fit")
+wh_FTCo_fit <- wh_FT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--fit", cnt=Continuing, L_typ="fit")
+wh_FT_fit <- rbind(wh_FTFT_fit,wh_FTTI_fit,wh_FTCo_fit)
+wh_FTFT_lwr <- wh_FT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--lwr", cnt=FirstTime, L_typ="lwr")
+wh_FTTI_lwr <- wh_FT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--lwr", cnt=TransferIn, L_typ="lwr")
+wh_FTCo_lwr <- wh_FT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--lwr", cnt=Continuing, L_typ="lwr")
+wh_FT_lwr <- rbind(wh_FTFT_lwr,wh_FTTI_lwr,wh_FTCo_lwr)
+wh_FTFT_upr <- wh_FT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--upr", cnt=FirstTime, L_typ="upr")
+wh_FTTI_upr <- wh_FT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--upr", cnt=TransferIn, L_typ="upr")
+wh_FTCo_upr <- wh_FT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--upr", cnt=Continuing, L_typ="upr")
+wh_FT_upr <- rbind(wh_FTFT_upr,wh_FTTI_upr,wh_FTCo_upr)
+wh_FTobserve_bind <- rbind(wh_FT_fit,wh_FT_lwr,wh_FT_upr)
+
+#put them all together into one useable DF
+wh_FT_bound <- rbind(wh_FTpred_bind,wh_FTobserve_bind)  #just for a graph, not for the actual model
+wh_FT_bound_grouped <- rbind(wh_FTpred_bind,wh_FTobserve_bind) %>% group_by(FY, L_typ) %>% summarise(cnt2=sum(cnt), .groups = 'drop') %>% mutate(grp="White_FT")
+
+
+
+##
+#SOC Part-Time Students
+##
+soc_PT <- df_ov %>% filter(Load=='PT' & REPORTING_RACE_ETHNICITY=='SOC')
+soc_PTFTmodel <- lm(FirstTime ~ FY,soc_PT)
+soc_PTTImodel <- lm(TransferIn ~ FY,soc_PT)
+soc_PTComodel <- lm(Continuing ~ FY,soc_PT)
+
+soc_PTFTpreds <- predict(soc_PTFTmodel, preds, interval="prediction")
+soc_PTTIpreds <- predict(soc_PTTImodel, preds, interval="prediction")
+soc_PTCopreds <- predict(soc_PTComodel, preds, interval="prediction")
+
+#bind predictions to their corresponding year
+soc_PTFTfit <- cbind(preds, soc_PTFTpreds) %>% transmute(FY, Load = "PT", Typ = "FirstTime--fit", cnt=fit, L_typ="fit")
+soc_PTTIfit <- cbind(preds, soc_PTTIpreds) %>% transmute(FY, Load = "PT", Typ = "TransferIn--fit", cnt=fit, L_typ="fit")
+soc_PTCofit <- cbind(preds, soc_PTCopreds) %>% transmute(FY, Load = "PT", Typ = "Continuing--fit", cnt=fit, L_typ="fit")
+soc_PTfit <- rbind(soc_PTFTfit,soc_PTTIfit,soc_PTCofit)
+soc_PTFTlwr <- cbind(preds, soc_PTFTpreds) %>% transmute(FY, Load = "PT", Typ = "FirstTime--lwr", cnt=lwr, L_typ="lwr")
+soc_PTTIlwr <- cbind(preds, soc_PTTIpreds) %>% transmute(FY, Load = "PT", Typ = "TransferIn--lwr", cnt=lwr, L_typ="lwr")
+soc_PTColwr <- cbind(preds, soc_PTCopreds) %>% transmute(FY, Load = "PT", Typ = "Continuing--lwr", cnt=lwr, L_typ="lwr")
+soc_PTlwr <- rbind(soc_PTFTlwr,soc_PTTIlwr,soc_PTColwr)
+soc_PTFTupr <- cbind(preds, soc_PTFTpreds) %>% transmute(FY, Load = "PT", Typ = "FirstTime--upr", cnt=upr, L_typ="upr")
+soc_PTTIupr <- cbind(preds, soc_PTTIpreds) %>% transmute(FY, Load = "PT", Typ = "TransferIn--upr", cnt=upr, L_typ="upr")
+soc_PTCoupr <- cbind(preds, soc_PTCopreds) %>% transmute(FY, Load = "PT", Typ = "Continuing--upr", cnt=upr, L_typ="upr")
+soc_PTupr <- rbind(soc_PTFTupr,soc_PTTIupr,soc_PTCoupr)
+soc_PTpred_bind <- rbind(soc_PTfit,soc_PTlwr,soc_PTupr)
+
+#format previous observances into something bindable to the predictions
+soc_PTFT_fit <- soc_PT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--fit", cnt=FirstTime, L_typ="fit")
+soc_PTTI_fit <- soc_PT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--fit", cnt=TransferIn, L_typ="fit")
+soc_PTCo_fit <- soc_PT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--fit", cnt=Continuing, L_typ="fit")
+soc_PT_fit <- rbind(soc_PTFT_fit,soc_PTTI_fit,soc_PTCo_fit)
+soc_PTFT_lwr <- soc_PT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--lwr", cnt=FirstTime, L_typ="lwr")
+soc_PTTI_lwr <- soc_PT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--lwr", cnt=TransferIn, L_typ="lwr")
+soc_PTCo_lwr <- soc_PT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--lwr", cnt=Continuing, L_typ="lwr")
+soc_PT_lwr <- rbind(soc_PTFT_lwr,soc_PTTI_lwr,soc_PTCo_lwr)
+soc_PTFT_upr <- soc_PT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--upr", cnt=FirstTime, L_typ="upr")
+soc_PTTI_upr <- soc_PT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--upr", cnt=TransferIn, L_typ="upr")
+soc_PTCo_upr <- soc_PT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--upr", cnt=Continuing, L_typ="upr")
+soc_PT_upr <- rbind(soc_PTFT_upr,soc_PTTI_upr,soc_PTCo_upr)
+soc_PTobserve_bind <- rbind(soc_PT_fit,soc_PT_lwr,soc_PT_upr)
+
+#put them all together into one useable DF
+soc_PT_bound <- rbind(soc_PTpred_bind,soc_PTobserve_bind)  #just for a graph, not for the actual model
+soc_PT_bound_grouped <- rbind(soc_PTpred_bind,soc_PTobserve_bind) %>% group_by(FY, L_typ) %>% summarise(cnt2=sum(cnt), .groups = 'drop') %>% mutate(grp="SOC_PT")
+
+
+
+##
+#SOC Full-Time Students
+##
+soc_FT <- df_ov %>% filter(Load=='FT' & REPORTING_RACE_ETHNICITY=='SOC')
+soc_FTFTmodel <- lm(FirstTime ~ FY,soc_FT)
+soc_FTTImodel <- lm(TransferIn ~ FY,soc_FT)
+soc_FTComodel <- lm(Continuing ~ FY,soc_FT)
+
+soc_FTFTpreds <- predict(soc_FTFTmodel, preds, interval="prediction")
+soc_FTTIpreds <- predict(soc_FTTImodel, preds, interval="prediction")
+soc_FTCopreds <- predict(soc_FTComodel, preds, interval="prediction")
+
+#bind predictions to their corresponding year
+soc_FTFTfit <- cbind(preds, soc_FTFTpreds) %>% transmute(FY, Load = "FT", Typ = "FirstTime--fit", cnt=fit, L_typ="fit")
+soc_FTTIfit <- cbind(preds, soc_FTTIpreds) %>% transmute(FY, Load = "FT", Typ = "TransferIn--fit", cnt=fit, L_typ="fit")
+soc_FTCofit <- cbind(preds, soc_FTCopreds) %>% transmute(FY, Load = "FT", Typ = "Continuing--fit", cnt=fit, L_typ="fit")
+soc_FTfit <- rbind(soc_FTFTfit,soc_FTTIfit,soc_FTCofit)
+soc_FTFTlwr <- cbind(preds, soc_FTFTpreds) %>% transmute(FY, Load = "FT", Typ = "FirstTime--lwr", cnt=lwr, L_typ="lwr")
+soc_FTTIlwr <- cbind(preds, soc_FTTIpreds) %>% transmute(FY, Load = "FT", Typ = "TransferIn--lwr", cnt=lwr, L_typ="lwr")
+soc_FTColwr <- cbind(preds, soc_FTCopreds) %>% transmute(FY, Load = "FT", Typ = "Continuing--lwr", cnt=lwr, L_typ="lwr")
+soc_FTlwr <- rbind(soc_FTFTlwr,soc_FTTIlwr,soc_FTColwr)
+soc_FTFTupr <- cbind(preds, soc_FTFTpreds) %>% transmute(FY, Load = "FT", Typ = "FirstTime--upr", cnt=upr, L_typ="upr")
+soc_FTTIupr <- cbind(preds, soc_FTTIpreds) %>% transmute(FY, Load = "FT", Typ = "TransferIn--upr", cnt=upr, L_typ="upr")
+soc_FTCoupr <- cbind(preds, soc_FTCopreds) %>% transmute(FY, Load = "FT", Typ = "Continuing--upr", cnt=upr, L_typ="upr")
+soc_FTupr <- rbind(soc_FTFTupr,soc_FTTIupr,soc_FTCoupr)
+soc_FTpred_bind <- rbind(soc_FTfit,soc_FTlwr,soc_FTupr)
+
+#format previous observances into something bindable to the predictions
+soc_FTFT_fit <- soc_FT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--fit", cnt=FirstTime, L_typ="fit")
+soc_FTTI_fit <- soc_FT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--fit", cnt=TransferIn, L_typ="fit")
+soc_FTCo_fit <- soc_FT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--fit", cnt=Continuing, L_typ="fit")
+soc_FT_fit <- rbind(soc_FTFT_fit,soc_FTTI_fit,soc_FTCo_fit)
+soc_FTFT_lwr <- soc_FT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--lwr", cnt=FirstTime, L_typ="lwr")
+soc_FTTI_lwr <- soc_FT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--lwr", cnt=TransferIn, L_typ="lwr")
+soc_FTCo_lwr <- soc_FT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--lwr", cnt=Continuing, L_typ="lwr")
+soc_FT_lwr <- rbind(soc_FTFT_lwr,soc_FTTI_lwr,soc_FTCo_lwr)
+soc_FTFT_upr <- soc_FT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--upr", cnt=FirstTime, L_typ="upr")
+soc_FTTI_upr <- soc_FT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--upr", cnt=TransferIn, L_typ="upr")
+soc_FTCo_upr <- soc_FT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--upr", cnt=Continuing, L_typ="upr")
+soc_FT_upr <- rbind(soc_FTFT_upr,soc_FTTI_upr,soc_FTCo_upr)
+soc_FTobserve_bind <- rbind(soc_FT_fit,soc_FT_lwr,soc_FT_upr)
+
+#put them all together into one useable DF
+soc_FT_bound <- rbind(soc_FTpred_bind,soc_FTobserve_bind)  #just for a graph, not for the actual model
+soc_FT_bound_grouped <- rbind(soc_FTpred_bind,soc_FTobserve_bind) %>% group_by(FY, L_typ) %>% summarise(cnt2=sum(cnt), .groups = 'drop') %>% mutate(grp="SOC_FT")
+
+#soc_FT_bound_grouped %>% filter(L_typ=='lwr' & FY == 2025)
+
+##
+##NRA average
+##
+NRA <- df_ov %>% filter(Load=='B' & REPORTING_RACE_ETHNICITY=='Nonresident Alien') %>% transmute(FY, cnt3=DegSeeking)
+NRA_fit <- NRA %>% mutate(L_typ="fit")
+NRA_lwr <- NRA %>% mutate(L_typ="lwr")
+NRA_upr <- NRA %>% mutate(L_typ="upr")
+NRA_B <- df_ov %>% filter(Load=='B' & REPORTING_RACE_ETHNICITY=='Nonresident Alien') %>% group_by(REPORTING_RACE_ETHNICITY) %>% summarise(fit=mean(DegSeeking),lwr=min(DegSeeking),upr=max(DegSeeking), .groups='drop')
+NRA_pred_fit <- preds %>% mutate(cnt3=33, L_typ="fit")
+NRA_pred_lwr <- preds %>% mutate(cnt3=20, L_typ="lwr")
+NRA_pred_upr <- preds %>% mutate(cnt3=44, L_typ="upr")
+NRA_bound <- rbind(NRA_fit,NRA_lwr,NRA_upr,NRA_pred_fit,NRA_pred_lwr,NRA_pred_upr) %>% mutate(grp="NRA")
+
+##
+##Combine the models
+##
+wh_bound <- rbind(wh_FT_bound_grouped,wh_PT_bound_grouped) #for a graph
+soc_bound <- rbind(soc_FT_bound_grouped,soc_PT_bound_grouped) #for a graph
+wh_bound_grouped <- wh_bound %>% group_by(FY,L_typ) %>% summarise(cnt3=sum(cnt2),.groups='drop') %>% mutate(grp="White")
+soc_bound_grouped <- soc_bound %>% group_by(FY,L_typ) %>% summarise(cnt3=sum(cnt2),.groups='drop') %>% mutate(grp="SOC")
+bound <- rbind(wh_bound_grouped,soc_bound_grouped,NRA_bound)
+bound_grouped <- bound %>% group_by(FY,L_typ) %>% summarise(cnt=sum(cnt3),.groups='drop')
+
+
+var10 <- bound_grouped
+
+titel10 <- "Part&Full-Time Student Enrollment Projection, by IPEDS category"
+#y-axis formatting
+ytitel10 <- "# of Students"
+yLimits10 <- c(0,3000)
+yBreaks10 <- c(0,200,400,600,800,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000)
+yLabels10 <- c(0,200,400,600,800,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000)
+#x-axis formatting
+xtitel10 <- "Fiscal Year"
+xLimits10 <- c(2015,2030)
+xBreaks10 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels10 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x10 <- 2022
+Txt_y10 <- 1700
+
+#color scheme
+pred9sub3 = c('#476D1D','#659A2A','#659A2A')
+
+
+m_grf10 <- ggplot(var10, aes(x=FY, y=cnt, color=L_typ)) + 
+  geom_line(stat='identity', lineend="round", linewidth=1) 
+m_grf10 +
+  labs(title=titel10, y=ytitel10, x=xtitel10) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1)) +
+  scale_y_continuous(limits=yLimits10, breaks=yBreaks10, labels=yLabels10) +     #y axis formatting
+  scale_color_manual(values=pred9sub3) +
+  geom_text(x=Txt_x10,y=Txt_y10, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits10, breaks=xBreaks10, labels=xLabels10) #x axis formatting
+
+
+var11 <- bound %>% filter(grp!="NRA")
+
+titel11 <- "White vs. SOC Enrollment Projection, by Combined IPEDS category"
+#y-axis formatting
+ytitel11 <- "# of Students"
+yLimits11 <- c(0,2400)
+yBreaks11 <- c(0,200,400,600,800,1000,1200,1400,1600,1800,2000,2200,2400)
+yLabels11 <- c(0,200,400,600,800,1000,1200,1400,1600,1800,2000,2200,2400)
+#x-axis formatting
+xtitel11 <- "Fiscal Year"
+xLimits11 <- c(2015,2030)
+xBreaks11 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels11 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x11 <- 2022
+Txt_y11 <- 1200
+
+#color scheme
+pred9sub3 = c("#0000C0","#0070C0","#0070C0",'#476D1D','#659A2A','#659A2A')
+
+
+m_grf11 <- ggplot(var11, aes(x=FY, y=cnt3, color=paste(grp,L_typ))) + 
+  geom_line(stat='identity', lineend="round", linewidth=1) 
+m_grf11 +
+  labs(title=titel11, y=ytitel11, x=xtitel11) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1), legend.position='none') +
+  scale_y_continuous(limits=yLimits11, breaks=yBreaks11, labels=yLabels11) +     #y axis formatting
+  scale_color_manual(values=pred9sub3) +
+  geom_text(x=Txt_x11,y=Txt_y11, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits11, breaks=xBreaks11, labels=xLabels11) #x axis formatting
+
+
+var12 <- wh_bound
+
+titel12 <- "FT vs PT White Student Enrollment Projection, by Combined IPEDS category"
+#y-axis formatting
+ytitel12 <- "# of Students"
+yLimits12 <- c(0,1600)
+yBreaks12 <- c(0,200,400,600,800,1000,1200,1400,1600)
+yLabels12 <- c(0,200,400,600,800,1000,1200,1400,1600)
+#x-axis formatting
+xtitel12 <- "Fiscal Year"
+xLimits12 <- c(2015,2030)
+xBreaks12 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels12 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x12 <- 2022
+Txt_y12 <- 900
+
+#color scheme
+pred9sub3 = c("#0000C0","#0070C0","#0070C0",'#8E0000','#D20000','#D20000')
+
+
+m_grf12 <- ggplot(var12, aes(x=FY, y=cnt2, color=paste(grp,L_typ))) + 
+  geom_line(stat='identity', lineend="round", linewidth=1) 
+m_grf12 +
+  labs(title=titel12, y=ytitel12, x=xtitel12) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1), legend.position='none') +
+  scale_y_continuous(limits=yLimits12, breaks=yBreaks12, labels=yLabels12) +     #y axis formatting
+  scale_color_manual(values=pred9sub3) +
+  geom_text(x=Txt_x12,y=Txt_y12, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits12, breaks=xBreaks12, labels=xLabels12) #x axis formatting
+
+
+
+var13 <- soc_bound
+
+titel13 <- "FT vs PT SOC Enrollment Projection, by Combined IPEDS category"
+#y-axis formatting
+ytitel13 <- "# of Students"
+yLimits13 <- c(0,1600)
+yBreaks13 <- c(0,200,400,600,800,1000,1200,1400,1600)
+yLabels13 <- c(0,200,400,600,800,1000,1200,1400,1600)
+#x-axis formatting
+xtitel13 <- "Fiscal Year"
+xLimits13 <- c(2015,2030)
+xBreaks13 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels13 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x13 <- 2022
+Txt_y13 <- 900
+
+#color scheme
+pred9sub3 = c("#0000C0","#0070C0","#0070C0",'#8E0000','#D20000','#D20000')
+
+
+m_grf13 <- ggplot(var13, aes(x=FY, y=cnt2, color=paste(grp,L_typ))) + 
+  geom_line(stat='identity', lineend="round", linewidth=1) 
+m_grf13 +
+  labs(title=titel13, y=ytitel13, x=xtitel13) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1), legend.position='none') +
+  scale_y_continuous(limits=yLimits13, breaks=yBreaks13, labels=yLabels13) +     #y axis formatting
+  scale_color_manual(values=pred9sub3) +
+  geom_text(x=Txt_x13,y=Txt_y13, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits13, breaks=xBreaks13, labels=xLabels13) #x axis formatting
+
+
+var14 <- soc_PT_bound
+#var14 <- soc_FT_bound
+#var14 <- wh_PT_bound
+#var14 <- wh_FT_bound
+
+titel14 <- "Part-Time, SOC IPEDS Category Projections"
+#y-axis formatting
+ytitel14 <- "# of Students"
+yLimits14 <- c(0,1200)
+yBreaks14 <- c(0,100,200,300,400,500,600,700,800,900,1000,1100,1200)
+yLabels14 <- c(0,100,200,300,400,500,600,700,800,900,1000,1100,1200)
+#x-axis formatting
+xtitel14 <- "Fiscal Year"
+xLimits14 <- c(2015,2030)
+xBreaks14 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels14 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x14 <- 2022
+Txt_y14 <- 600
+
+#color scheme
+pred9sub3 = c("#0000C0","#0070C0","#0070C0",'#8E0000','#D20000','#D20000','#476D1D','#659A2A','#659A2A')
+
+
+m_grf14 <- ggplot(var14, aes(x=FY, y=cnt, color=Typ)) + 
+  geom_line(stat='identity', lineend="round", linewidth=1) 
+m_grf14 +
+  labs(title=titel14, y=ytitel14, x=xtitel14) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1), legend.position='none') +
+  scale_y_continuous(limits=yLimits14, breaks=yBreaks14, labels=yLabels14) +     #y axis formatting
+  scale_color_manual(values=pred9sub3) +
+  geom_text(x=Txt_x14,y=Txt_y14, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits14, breaks=xBreaks14, labels=xLabels14) #x axis formatting
+
+```
+
+
+
+##HSI prediction model
+```{r}
+##
+#Hispanic Part-Time Students
+##
+hisp_PT <- df_ov %>% filter(Load=='PT' & REPORTING_RACE_ETHNICITY=='Hispanic of any race')
+hisp_PTFTmodel <- lm(FirstTime ~ FY,hisp_PT)
+hisp_PTTImodel <- lm(TransferIn ~ FY,hisp_PT)
+hisp_PTComodel <- lm(Continuing ~ FY,hisp_PT)
+
+hisp_PTFTpreds <- predict(hisp_PTFTmodel, preds, interval="prediction")
+hisp_PTTIpreds <- predict(hisp_PTTImodel, preds, interval="prediction")
+hisp_PTCopreds <- predict(hisp_PTComodel, preds, interval="prediction")
+
+#bind predictions to their corresponding year
+hisp_PTFTfit <- cbind(preds, hisp_PTFTpreds) %>% transmute(FY, Load = "PT", Typ = "FirstTime--fit", cnt=fit, L_typ="fit")
+hisp_PTTIfit <- cbind(preds, hisp_PTTIpreds) %>% transmute(FY, Load = "PT", Typ = "TransferIn--fit", cnt=fit, L_typ="fit")
+hisp_PTCofit <- cbind(preds, hisp_PTCopreds) %>% transmute(FY, Load = "PT", Typ = "Continuing--fit", cnt=fit, L_typ="fit")
+hisp_PTfit <- rbind(hisp_PTFTfit,hisp_PTTIfit,hisp_PTCofit)
+hisp_PTFTlwr <- cbind(preds, hisp_PTFTpreds) %>% transmute(FY, Load = "PT", Typ = "FirstTime--lwr", cnt=lwr, L_typ="lwr")
+hisp_PTTIlwr <- cbind(preds, hisp_PTTIpreds) %>% transmute(FY, Load = "PT", Typ = "TransferIn--lwr", cnt=lwr, L_typ="lwr")
+hisp_PTColwr <- cbind(preds, hisp_PTCopreds) %>% transmute(FY, Load = "PT", Typ = "Continuing--lwr", cnt=lwr, L_typ="lwr")
+hisp_PTlwr <- rbind(hisp_PTFTlwr,hisp_PTTIlwr,hisp_PTColwr)
+hisp_PTFTupr <- cbind(preds, hisp_PTFTpreds) %>% transmute(FY, Load = "PT", Typ = "FirstTime--upr", cnt=upr, L_typ="upr")
+hisp_PTTIupr <- cbind(preds, hisp_PTTIpreds) %>% transmute(FY, Load = "PT", Typ = "TransferIn--upr", cnt=upr, L_typ="upr")
+hisp_PTCoupr <- cbind(preds, hisp_PTCopreds) %>% transmute(FY, Load = "PT", Typ = "Continuing--upr", cnt=upr, L_typ="upr")
+hisp_PTupr <- rbind(hisp_PTFTupr,hisp_PTTIupr,hisp_PTCoupr)
+hisp_PTpred_bind <- rbind(hisp_PTfit,hisp_PTlwr,hisp_PTupr)
+
+#format previous observances into something bindable to the predictions
+hisp_PTFT_fit <- hisp_PT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--fit", cnt=FirstTime, L_typ="fit")
+hisp_PTTI_fit <- hisp_PT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--fit", cnt=TransferIn, L_typ="fit")
+hisp_PTCo_fit <- hisp_PT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--fit", cnt=Continuing, L_typ="fit")
+hisp_PT_fit <- rbind(hisp_PTFT_fit,hisp_PTTI_fit,hisp_PTCo_fit)
+hisp_PTFT_lwr <- hisp_PT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--lwr", cnt=FirstTime, L_typ="lwr")
+hisp_PTTI_lwr <- hisp_PT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--lwr", cnt=TransferIn, L_typ="lwr")
+hisp_PTCo_lwr <- hisp_PT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--lwr", cnt=Continuing, L_typ="lwr")
+hisp_PT_lwr <- rbind(hisp_PTFT_lwr,hisp_PTTI_lwr,hisp_PTCo_lwr)
+hisp_PTFT_upr <- hisp_PT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--upr", cnt=FirstTime, L_typ="upr")
+hisp_PTTI_upr <- hisp_PT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--upr", cnt=TransferIn, L_typ="upr")
+hisp_PTCo_upr <- hisp_PT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--upr", cnt=Continuing, L_typ="upr")
+hisp_PT_upr <- rbind(hisp_PTFT_upr,hisp_PTTI_upr,hisp_PTCo_upr)
+hisp_PTobserve_bind <- rbind(hisp_PT_fit,hisp_PT_lwr,hisp_PT_upr)
+
+#put them all together into one useable DF
+hisp_PT_bound <- rbind(hisp_PTpred_bind,hisp_PTobserve_bind)  #just for a graph, not for the actual model
+hisp_PT_bound_grouped <- rbind(hisp_PTpred_bind,hisp_PTobserve_bind) %>% group_by(FY, L_typ) %>% summarise(cnt2=sum(cnt), .groups = 'drop') %>% mutate(grp="White_PT")
+
+
+##
+#Hispanic Full-Time Students
+##
+hisp_FT <- df_ov %>% filter(Load=='FT' & REPORTING_RACE_ETHNICITY=='Hispanic of any race')
+hisp_FTFTmodel <- lm(FirstTime ~ FY,hisp_FT)
+hisp_FTTImodel <- lm(TransferIn ~ FY,hisp_FT)
+hisp_FTComodel <- lm(Continuing ~ FY,hisp_FT)
+
+hisp_FTFTpreds <- predict(hisp_FTFTmodel, preds, interval="prediction")
+hisp_FTTIpreds <- predict(hisp_FTTImodel, preds, interval="prediction")
+hisp_FTCopreds <- predict(hisp_FTComodel, preds, interval="prediction")
+
+#bind predictions to their corresponding year
+hisp_FTFTfit <- cbind(preds, hisp_FTFTpreds) %>% transmute(FY, Load = "FT", Typ = "FirstTime--fit", cnt=fit, L_typ="fit")
+hisp_FTTIfit <- cbind(preds, hisp_FTTIpreds) %>% transmute(FY, Load = "FT", Typ = "TransferIn--fit", cnt=fit, L_typ="fit")
+hisp_FTCofit <- cbind(preds, hisp_FTCopreds) %>% transmute(FY, Load = "FT", Typ = "Continuing--fit", cnt=fit, L_typ="fit")
+hisp_FTfit <- rbind(hisp_FTFTfit,hisp_FTTIfit,hisp_FTCofit)
+hisp_FTFTlwr <- cbind(preds, hisp_FTFTpreds) %>% transmute(FY, Load = "FT", Typ = "FirstTime--lwr", cnt=lwr, L_typ="lwr")
+hisp_FTTIlwr <- cbind(preds, hisp_FTTIpreds) %>% transmute(FY, Load = "FT", Typ = "TransferIn--lwr", cnt=lwr, L_typ="lwr")
+hisp_FTColwr <- cbind(preds, hisp_FTCopreds) %>% transmute(FY, Load = "FT", Typ = "Continuing--lwr", cnt=lwr, L_typ="lwr")
+hisp_FTlwr <- rbind(hisp_FTFTlwr,hisp_FTTIlwr,hisp_FTColwr)
+hisp_FTFTupr <- cbind(preds, hisp_FTFTpreds) %>% transmute(FY, Load = "FT", Typ = "FirstTime--upr", cnt=upr, L_typ="upr")
+hisp_FTTIupr <- cbind(preds, hisp_FTTIpreds) %>% transmute(FY, Load = "FT", Typ = "TransferIn--upr", cnt=upr, L_typ="upr")
+hisp_FTCoupr <- cbind(preds, hisp_FTCopreds) %>% transmute(FY, Load = "FT", Typ = "Continuing--upr", cnt=upr, L_typ="upr")
+hisp_FTupr <- rbind(hisp_FTFTupr,hisp_FTTIupr,hisp_FTCoupr)
+hisp_FTpred_bind <- rbind(hisp_FTfit,hisp_FTlwr,hisp_FTupr)
+
+#format previous observances into something bindable to the predictions
+hisp_FTFT_fit <- hisp_FT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--fit", cnt=FirstTime, L_typ="fit")
+hisp_FTTI_fit <- hisp_FT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--fit", cnt=TransferIn, L_typ="fit")
+hisp_FTCo_fit <- hisp_FT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--fit", cnt=Continuing, L_typ="fit")
+hisp_FT_fit <- rbind(hisp_FTFT_fit,hisp_FTTI_fit,hisp_FTCo_fit)
+hisp_FTFT_lwr <- hisp_FT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--lwr", cnt=FirstTime, L_typ="lwr")
+hisp_FTTI_lwr <- hisp_FT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--lwr", cnt=TransferIn, L_typ="lwr")
+hisp_FTCo_lwr <- hisp_FT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--lwr", cnt=Continuing, L_typ="lwr")
+hisp_FT_lwr <- rbind(hisp_FTFT_lwr,hisp_FTTI_lwr,hisp_FTCo_lwr)
+hisp_FTFT_upr <- hisp_FT %>% transmute(FY=FY, Load=Load, Typ = "FirstTime--upr", cnt=FirstTime, L_typ="upr")
+hisp_FTTI_upr <- hisp_FT %>% transmute(FY=FY, Load=Load, Typ = "TransferIn--upr", cnt=TransferIn, L_typ="upr")
+hisp_FTCo_upr <- hisp_FT %>% transmute(FY=FY, Load=Load, Typ = "Continuing--upr", cnt=Continuing, L_typ="upr")
+hisp_FT_upr <- rbind(hisp_FTFT_upr,hisp_FTTI_upr,hisp_FTCo_upr)
+hisp_FTobserve_bind <- rbind(hisp_FT_fit,hisp_FT_lwr,hisp_FT_upr)
+
+#put them all together into one useable DF
+hisp_FT_bound <- rbind(hisp_FTpred_bind,hisp_FTobserve_bind)  #just for a graph, not for the actual model
+hisp_FT_bound_grouped <- rbind(hisp_FTpred_bind,hisp_FTobserve_bind) %>% group_by(FY, L_typ) %>% summarise(cnt2=sum(cnt), .groups = 'drop') %>% mutate(grp="White_FT")
+
+
+hisp_bound <- rbind(hisp_FT_bound_grouped,hisp_PT_bound_grouped) #for a graph
+hisp_bound_grouped <- hisp_bound %>% group_by(FY,L_typ) %>% summarise(cnt3=sum(cnt2),.groups='drop') %>% mutate(grp="Hisp")
+
+var15 <- hisp_bound_grouped
+
+titel15 <- "Part&Full-Time Hispanic Enrollment Growth, byIPEDS Category"
+#y-axis formatting
+ytitel15 <- "# of Students"
+yLimits15 <- c(0,800)
+yBreaks15 <- c(0,100,200,300,400,500,600,700,800)
+yLabels15 <- c(0,100,200,300,400,500,600,700,800)
+#x-axis formatting
+xtitel15 <- "Fiscal Year"
+xLimits15 <- c(2015,2030)
+xBreaks15 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels15 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x15 <- 2022
+Txt_y15 <- 600
+
+#color scheme
+pred9sub3 = c("#0000C0","#0070C0","#0070C0")
+
+
+m_grf15 <- ggplot(var15, aes(x=FY, y=cnt3, color=L_typ)) + 
+  geom_line(stat='identity', lineend="round", linewidth=1) 
+m_grf15 +
+  labs(title=titel15, y=ytitel15, x=xtitel15) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1), legend.position='none') +
+  scale_y_continuous(limits=yLimits15, breaks=yBreaks15, labels=yLabels15) +     #y axis formatting
+  scale_color_manual(values=pred9sub3) +
+  geom_text(x=Txt_x15,y=Txt_y15, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits15, breaks=xBreaks15, labels=xLabels15) #x axis formatting
+
+
+bound_grouped_4hsi <- bound_grouped %>% transmute(FY,L_typ,cnt3=cnt, grp="SB")
+hsi_bounded <- rbind(hisp_bound_grouped,bound_grouped_4hsi)
+
+var16 <- hsi_bounded
+
+titel16 <- "HSI prediction"
+#y-axis formatting
+ytitel16 <- "# of Students"
+yLimits16 <- c(0,3800)
+yBreaks16 <- c(0,200,400,600,800,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200,3400,3600,3800)
+yLabels16 <- c(0,200,400,600,800,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200,3400,3600,3800)
+#x-axis formatting
+xtitel16 <- "Fiscal Year"
+xLimits16 <- c(2015,2030)
+xBreaks16 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels16 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x16 <- 2022
+Txt_y16 <- 1800
+
+#color scheme
+pred9sub3 = c("#0000C0","#0070C0","#0070C0",'#8E0000','#D20000','#D20000')
+
+
+m_grf16 <- ggplot(var16, aes(x=FY, y=cnt3, color=paste(grp,L_typ))) + 
+  geom_line(stat='identity', lineend="round", linewidth=1) 
+m_grf16 +
+  labs(title=titel16, y=ytitel16, x=xtitel16) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1), legend.position='none') +
+  scale_y_continuous(limits=yLimits16, breaks=yBreaks16, labels=yLabels16) +     #y axis formatting
+  scale_color_manual(values=pred9sub3) +
+  geom_text(x=Txt_x16,y=Txt_y16, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits16, breaks=xBreaks16, labels=xLabels16) #x axis formatting
+```
+
+##Adult Learners growth model
+```{r}
+##You stopped here on Friday.  If you hard charge this on Monday, you can close it out.  You can try combining two models with PT and FT here, but I don't think that it is going to do you much good.  
+##There just aren't that many adult learners.
+#I suggest setting up and running those ones through pvalue testing right away to see if you can rule them out.
+#Only downer is that you do not currently have a "B" category on your AL csv, so you will need to create that.
+
+#I was right, you can't find enough significance in PT at the individual race level
+#Use DS for SOC & White; they can be broken into PT & FT models
+#continue using avg for NRA
+
+##
+#White Part-Time Students
+##
+wh_PT <- df_al %>% filter(Load=='PT' & REPORTING_RACE_ETHNICITY=='White')
+
+wh_PTDSmodel <- lm(DegSeeking ~ FY,wh_PT)
+
+wh_PTDSpreds <- predict(wh_PTDSmodel, preds, interval="prediction")
+
+#bind predictions to their corresponding year
+wh_PTDSfit <- cbind(preds, wh_PTDSpreds) %>% transmute(FY, Load = "PT", Typ = "DegSeeking--fit", cnt=fit, L_typ="fit")
+wh_PTDSlwr <- cbind(preds, wh_PTDSpreds) %>% transmute(FY, Load = "PT", Typ = "DegSeeking--lwr", cnt=lwr, L_typ="lwr")
+wh_PTDSupr <- cbind(preds, wh_PTDSpreds) %>% transmute(FY, Load = "PT", Typ = "DegSeeking--upr", cnt=upr, L_typ="upr")
+
+wh_PTpred_bind <- rbind(wh_PTDSfit,wh_PTDSlwr,wh_PTDSupr)
+
+#format previous observances into something bindable to the predictions
+wh_PTDS_fit <- wh_PT %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--fit", cnt=DegSeeking, L_typ="fit")
+wh_PTDS_lwr <- wh_PT %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--lwr", cnt=DegSeeking, L_typ="lwr")
+wh_PTDS_upr <- wh_PT %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--upr", cnt=DegSeeking, L_typ="upr")
+
+wh_PTobserve_bind <- rbind(wh_PTDS_fit,wh_PTDS_lwr,wh_PTDS_upr)
+
+#put them all together into one useable DF
+wh_PT_bound <- rbind(wh_PTpred_bind,wh_PTobserve_bind)  #just for a graph, not for the actual model
+wh_PT_bound_grouped <- rbind(wh_PTpred_bind,wh_PTobserve_bind) %>% group_by(FY, L_typ) %>% summarise(cnt2=sum(cnt), .groups = 'drop') %>% mutate(grp="White_PT")
+
+
+##
+#White Full-Time Students
+##
+wh_FT <- df_al %>% filter(Load=='FT' & REPORTING_RACE_ETHNICITY=='White')
+
+wh_FTDSmodel <- lm(DegSeeking ~ FY,wh_FT)
+
+wh_FTDSpreds <- predict(wh_FTDSmodel, preds, interval="prediction")
+
+#bind predictions to their corresponding year
+wh_FTDSfit <- cbind(preds, wh_FTDSpreds) %>% transmute(FY, Load = "FT", Typ = "DegSeeking--fit", cnt=fit, L_typ="fit")
+wh_FTDSlwr <- cbind(preds, wh_FTDSpreds) %>% transmute(FY, Load = "FT", Typ = "DegSeeking--lwr", cnt=lwr, L_typ="lwr")
+wh_FTDSupr <- cbind(preds, wh_FTDSpreds) %>% transmute(FY, Load = "FT", Typ = "DegSeeking--upr", cnt=upr, L_typ="upr")
+
+wh_FTpred_bind <- rbind(wh_FTDSfit,wh_FTDSlwr,wh_FTDSupr)
+
+#format previous observances into something bindable to the predictions
+wh_FTDS_fit <- wh_FT %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--fit", cnt=DegSeeking, L_typ="fit")
+wh_FTDS_lwr <- wh_FT %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--lwr", cnt=DegSeeking, L_typ="lwr")
+wh_FTDS_upr <- wh_FT %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--upr", cnt=DegSeeking, L_typ="upr")
+
+wh_FTobserve_bind <- rbind(wh_FTDS_fit,wh_FTDS_lwr,wh_FTDS_upr)
+
+#put them all together into one useable DF
+wh_FT_bound <- rbind(wh_FTpred_bind,wh_FTobserve_bind)  #just for a graph, not for the actual model
+wh_FT_bound_grouped <- rbind(wh_FTpred_bind,wh_FTobserve_bind) %>% group_by(FY, L_typ) %>% summarise(cnt2=sum(cnt), .groups = 'drop') %>% mutate(grp="White_FT")
+
+
+
+##
+#SOC Part-Time Students
+##
+soc_PT <- df_al %>% filter(Load=='PT' & REPORTING_RACE_ETHNICITY=='SOC')
+
+soc_PTDSmodel <- lm(DegSeeking ~ FY,soc_PT)
+
+soc_PTDSpreds <- predict(soc_PTDSmodel, preds, interval="prediction")
+
+#bind predictions to their corresponding year
+soc_PTDSfit <- cbind(preds, soc_PTDSpreds) %>% transmute(FY, Load = "PT", Typ = "DegSeeking--fit", cnt=fit, L_typ="fit")
+soc_PTDSlwr <- cbind(preds, soc_PTDSpreds) %>% transmute(FY, Load = "PT", Typ = "DegSeeking--lwr", cnt=lwr, L_typ="lwr")
+soc_PTDSupr <- cbind(preds, soc_PTDSpreds) %>% transmute(FY, Load = "PT", Typ = "DegSeeking--upr", cnt=upr, L_typ="upr")
+
+soc_PTpred_bind <- rbind(soc_PTDSfit,soc_PTDSlwr,soc_PTDSupr)
+
+#format previous observances into something bindable to the predictions
+soc_PTDS_fit <- soc_PT %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--fit", cnt=DegSeeking, L_typ="fit")
+soc_PTDS_lwr <- soc_PT %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--lwr", cnt=DegSeeking, L_typ="lwr")
+soc_PTDS_upr <- soc_PT %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--upr", cnt=DegSeeking, L_typ="upr")
+
+soc_PTobserve_bind <- rbind(soc_PTDS_fit,soc_PTDS_lwr,soc_PTDS_upr)
+
+#put them all together into one useable DF
+soc_PT_bound <- rbind(soc_PTpred_bind,soc_PTobserve_bind)  #just for a graph, not for the actual model
+soc_PT_bound_grouped <- rbind(soc_PTpred_bind,soc_PTobserve_bind) %>% group_by(FY, L_typ) %>% summarise(cnt2=sum(cnt), .groups = 'drop') %>% mutate(grp="SOC_PT")
+
+
+##
+#SOC Full-Time Students
+##
+soc_FT <- df_al %>% filter(Load=='FT' & REPORTING_RACE_ETHNICITY=='SOC')
+
+soc_FTDSmodel <- lm(DegSeeking ~ FY,soc_FT)
+
+soc_FTDSpreds <- predict(soc_FTDSmodel, preds, interval="prediction")
+
+#bind predictions to their corresponding year
+soc_FTDSfit <- cbind(preds, soc_FTDSpreds) %>% transmute(FY, Load = "FT", Typ = "DegSeeking--fit", cnt=fit, L_typ="fit")
+soc_FTDSlwr <- cbind(preds, soc_FTDSpreds) %>% transmute(FY, Load = "FT", Typ = "DegSeeking--lwr", cnt=lwr, L_typ="lwr")
+soc_FTDSupr <- cbind(preds, soc_FTDSpreds) %>% transmute(FY, Load = "FT", Typ = "DegSeeking--upr", cnt=upr, L_typ="upr")
+
+soc_FTpred_bind <- rbind(soc_FTDSfit,soc_FTDSlwr,soc_FTDSupr)
+
+#format previous observances into something bindable to the predictions
+soc_FTDS_fit <- soc_FT %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--fit", cnt=DegSeeking, L_typ="fit")
+soc_FTDS_lwr <- soc_FT %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--lwr", cnt=DegSeeking, L_typ="lwr")
+soc_FTDS_upr <- soc_FT %>% transmute(FY=FY, Load=Load, Typ = "DegSeeking--upr", cnt=DegSeeking, L_typ="upr")
+
+soc_FTobserve_bind <- rbind(soc_FTDS_fit,soc_FTDS_lwr,soc_FTDS_upr)
+
+#put them all together into one useable DF
+soc_FT_bound <- rbind(soc_FTpred_bind,soc_FTobserve_bind)  #just for a graph, not for the actual model
+soc_FT_bound_grouped <- rbind(soc_FTpred_bind,soc_FTobserve_bind) %>% group_by(FY, L_typ) %>% summarise(cnt2=sum(cnt), .groups = 'drop') %>% mutate(grp="SOC_FT")
+
+##
+##NRA average
+##
+NRA <- df_al %>% filter(Load=='B' & REPORTING_RACE_ETHNICITY=='Nonresident Alien') %>% transmute(FY, cnt3=DegSeeking)
+NRA_fit <- NRA %>% mutate(L_typ="fit")
+NRA_lwr <- NRA %>% mutate(L_typ="lwr")
+NRA_upr <- NRA %>% mutate(L_typ="upr")
+NRA_B <- df_al %>% filter(Load=='B' & REPORTING_RACE_ETHNICITY=='Nonresident Alien') %>% group_by(REPORTING_RACE_ETHNICITY) %>% summarise(fit=mean(DegSeeking),lwr=min(DegSeeking),upr=max(DegSeeking), .groups='drop')
+NRA_pred_fit <- preds %>% mutate(cnt3=5, L_typ="fit")
+NRA_pred_lwr <- preds %>% mutate(cnt3=3, L_typ="lwr")
+NRA_pred_upr <- preds %>% mutate(cnt3=9, L_typ="upr")
+NRA_bound <- rbind(NRA_fit,NRA_lwr,NRA_upr,NRA_pred_fit,NRA_pred_lwr,NRA_pred_upr) %>% mutate(grp="NRA")
+
+##
+##Combine the models
+##
+wh_bound <- rbind(wh_FT_bound_grouped,wh_PT_bound_grouped) #for a graph
+soc_bound <- rbind(soc_FT_bound_grouped,soc_PT_bound_grouped) #for a graph
+wh_bound_grouped <- wh_bound %>% group_by(FY,L_typ) %>% summarise(cnt3=sum(cnt2),.groups='drop') %>% mutate(grp="White")
+soc_bound_grouped <- soc_bound %>% group_by(FY,L_typ) %>% summarise(cnt3=sum(cnt2),.groups='drop') %>% mutate(grp="SOC")
+bound <- rbind(wh_bound_grouped,soc_bound_grouped,NRA_bound)
+bound_grouped <- bound %>% group_by(FY,L_typ) %>% summarise(cnt=sum(cnt3),.groups='drop')
+
+
+##
+##things to be graphed
+##
+#soc_FT_bound  %>% filter(L_typ=='fit' & FY > 2024)
+#soc_PT_bound
+#wh_bound
+#soc_bound %>% filter(L_typ=='fit' & FY > 2024)
+#bound
+#wh_bound_grouped
+#bound_grouped
+
+var17 <- bound_grouped
+
+titel17 <- "Part&Full-Time Adult Learner Enrollment Projection"
+#y-axis formatting
+ytitel17 <- "# of Students"
+yLimits17 <- c(0,1600)
+yBreaks17 <- c(0,200,400,600,800,1000,1200,1400,1600)
+yLabels17 <- c(0,200,400,600,800,1000,1200,1400,1600)
+#x-axis formatting
+xtitel17 <- "Fiscal Year"
+xLimits17 <- c(2015,2030)
+xBreaks17 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels17 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x17 <- 2022
+Txt_y17 <- 800
+
+#color scheme
+pred9sub3 = c('#476D1D','#659A2A','#659A2A')
+
+
+m_grf17 <- ggplot(var17, aes(x=FY, y=cnt, color=L_typ)) + 
+  geom_line(stat='identity', lineend="round", linewidth=1) 
+m_grf17 +
+  labs(title=titel17, y=ytitel17, x=xtitel17) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1), legend.position='none') +
+  scale_y_continuous(limits=yLimits17, breaks=yBreaks17, labels=yLabels17) +     #y axis formatting
+  scale_color_manual(values=pred9sub3) +
+  geom_text(x=Txt_x17,y=Txt_y17, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits17, breaks=xBreaks17, labels=xLabels17) #x axis formatting
+
+
+var18 <- bound %>% filter(grp!="NRA")
+
+titel18 <- "White vs. SOC Adult Learner Enrollment Projection"
+#y-axis formatting
+ytitel18 <- "# of Students"
+yLimits18 <- c(0,1400)
+yBreaks18 <- c(0,200,400,600,800,1000,1200,1400)
+yLabels18 <- c(0,200,400,600,800,1000,1200,1400)
+#x-axis formatting
+xtitel18 <- "Fiscal Year"
+xLimits18 <- c(2015,2030)
+xBreaks18 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels18 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x18 <- 2022
+Txt_y18 <- 1200
+
+#color scheme
+pred9sub3 = c("#0000C0","#0070C0","#0070C0",'#476D1D','#659A2A','#659A2A')
+
+
+m_grf18 <- ggplot(var18, aes(x=FY, y=cnt3, color=paste(grp,L_typ))) + 
+  geom_line(stat='identity', lineend="round", linewidth=1) 
+m_grf18 +
+  labs(title=titel18, y=ytitel18, x=xtitel18) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1), legend.position='none') +
+  scale_y_continuous(limits=yLimits18, breaks=yBreaks18, labels=yLabels18) +     #y axis formatting
+  scale_color_manual(values=pred9sub3) +
+  geom_text(x=Txt_x18,y=Txt_y18, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits18, breaks=xBreaks18, labels=xLabels18) #x axis formatting
+
+
+
+var19 <- wh_bound
+
+titel19 <- "FT vs PT White Adult Learner Projection"
+#y-axis formatting
+ytitel19 <- "# of Students"
+yLimits19 <- c(0,900)
+yBreaks19 <- c(0,100,200,300,400,500,600,700,800,900)
+yLabels19 <- c(0,100,200,300,400,500,600,700,800,900)
+#x-axis formatting
+xtitel19 <- "Fiscal Year"
+xLimits19 <- c(2015,2030)
+xBreaks19 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels19 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x19 <- 2022
+Txt_y19 <- 500
+
+#color scheme
+pred9sub3 = c("#0000C0","#0070C0","#0070C0",'#8E0000','#D20000','#D20000')
+
+
+m_grf19 <- ggplot(var19, aes(x=FY, y=cnt2, color=paste(grp,L_typ))) + 
+  geom_line(stat='identity', lineend="round", linewidth=1) 
+m_grf19 +
+  labs(title=titel19, y=ytitel19, x=xtitel19) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1), legend.position='none') +
+  scale_y_continuous(limits=yLimits19, breaks=yBreaks19, labels=yLabels19) +     #y axis formatting
+  scale_color_manual(values=pred9sub3) +
+  geom_text(x=Txt_x19,y=Txt_y19, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits19, breaks=xBreaks19, labels=xLabels19) #x axis formatting
+
+var20 <- soc_bound
+
+titel20 <- "FT vs PT SOC Adult Learner Projection"
+#y-axis formatting
+ytitel20 <- "# of Students"
+yLimits20 <- c(0,900)
+yBreaks20 <- c(0,100,200,300,400,500,600,700,800,900)
+yLabels20 <- c(0,100,200,300,400,500,600,700,800,900)
+#x-axis formatting
+xtitel20 <- "Fiscal Year"
+xLimits20 <- c(2015,2030)
+xBreaks20 <- c(2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030)
+xLabels20 <- c("FY15","FY16","FY17","FY18","FY19","FY20","FY21","FY22","FY23","FY24","FY25","FY26","FY27","FY28","FY29","FY30")
+#watermark position
+Txt_x20 <- 2022
+Txt_y20 <- 500
+
+#color scheme
+pred9sub3 = c("#0000C0","#0070C0","#0070C0",'#8E0000','#D20000','#D20000')
+
+
+m_grf20 <- ggplot(var20, aes(x=FY, y=cnt2, color=paste(grp,L_typ))) + 
+  geom_line(stat='identity', lineend="round", linewidth=1) 
+m_grf20 +
+  labs(title=titel20, y=ytitel20, x=xtitel20) +    #graph and axis titles
+  theme(axis.line=element_line(colour="black", linewidth=1, linetype="solid"), axis.text.x=element_text(angle=60, hjust=1), legend.position='none') +
+  scale_y_continuous(limits=yLimits20, breaks=yBreaks20, labels=yLabels20) +     #y axis formatting
+  scale_color_manual(values=pred9sub3) +
+  geom_text(x=Txt_x20,y=Txt_y20, label='Not for Publication', color="black") +  #watermark
+  scale_x_continuous(limits=xLimits20, breaks=xBreaks20, labels=xLabels20) #x axis formatting
+
+```
+
