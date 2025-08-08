@@ -1,0 +1,376 @@
+import pandas as pd
+import numpy as np
+from scipy import stats
+
+##FUNCTIONS LIBRARY
+def encode_SuccessRate(df):
+    df['CS'] = 0.0
+    df.loc[df['COU_SUCC'] == 'Success','CS'] = 1.0
+    return df
+
+def calc_GPA2(df):
+    HC = df[['Student','Semester']].copy().drop_duplicates(subset=['Student','Semester'],keep='first')
+    HC.reset_index(drop=True,inplace=True)
+    out = pd.DataFrame(columns=
+        ['Student','Semester','GPA','Credits','Courses'])
+    stu, gp, gpa, creds, cou = 0,0,0,0,0
+    termc, termgp, termgpa, termcou = 0,0,0,0
+    n=0
+    for i in HC.index:
+        stu = HC.at[i,'Student']
+        yrt = HC.at[i,'Semester']
+        creds = df.loc[(df['Student'] == stu)&(df['Semester'] == yrt),'CreditHours'].sum()
+        cou = df.loc[(df['Student'] == stu)&(df['Semester'] == yrt),'CreditHours'].count()
+        gp = df.loc[(df['Student'] == stu)&(df['Semester'] == yrt),'COU_GPA_PNT'].sum()
+        gpa = gp / creds
+        cs = df.loc[(df['Student'] == stu)&(df['Semester'] == yrt),'CS'].sum()
+        sr = cs / cou
+        newrow = pd.DataFrame({
+            'Student': stu,
+            'Semester': yrt,
+            'GPA': gpa,
+            'Credits': creds,
+            'Courses': cou,
+            'SR': sr},
+            index = [n])
+        out = pd.concat([out,newrow])
+        n=n+1
+    return out
+
+def ttest(df,metric):
+    listy3 = [1,2,3,4,5,6,7,8,9,10]
+    for i in listy3:
+        testcol = f't{i}_{metric}'
+        test1 = stats.ttest_ind(df[metric], df[testcol])
+        test2 = stats.ttest_rel(df[metric], df[testcol])
+        if test1.pvalue > 0.05:
+            t1 = f'Insig - {round(test1.pvalue,3)}'
+        else: t1 = round(test1.pvalue,5)
+        if test2.pvalue > 0.05:
+            t2 = f'Insig - {round(test2.pvalue,3)}'
+        else: t2 = round(test2.pvalue,5)
+        #print(testcol,': ',t1,'    |    ', t2)
+        print(testcol,': ', t2)
+
+##IMPORT DATA
+LLs = pd.read_csv('TestGroup_population.csv')
+others = pd.read_csv('GeneralPopulation_Records.csv')
+LLcR = pd.read_csv('TestGroup_Records.csv')
+LLnS = pd.read_csv('TestGroup_persistence.csv')
+majors = pd.read_csv('AllMajors.csv')
+attendance = pd.read_csv('TestGroup_attendance.csv')
+
+##REQUIRED CLEANING WITH FUNCTIONS
+##create a SR & GPA with just the semester GPAs for all students
+LLcR_gpa = calc_GPA2(encode_SuccessRate(LLcR))
+others_gpa = calc_GPA2(encode_SuccessRate(others))
+
+##COMBINE DATASETS AS NEEDED
+#merge the LLAB students with their majors and subset out the drops
+registrations = LLs[['Student','Semester','Cou_term_id','DropStampTime','LetterGrade']]
+LL_majors = pd.merge(registrations, majors, how='left', on=['Student','Semester'])
+labbers = LL_majors.loc[(LL_majors['DropStampTime'].isna() == True) & (LL_majors['LetterGrade'].isna() == True),:]
+drops = LL_majors.loc[(LL_majors['DropStampTime'].isna() == False) | (LL_majors['LetterGrade'].isna() == False),:]
+#merge LLAB student course records with their majors
+LLcR_majors1 = pd.merge(LLcR, majors, how='left', on=['Student','Semester'])
+LLcR_majors = pd.merge(LLcR_majors1, LLcR_gpa, how='left', on=['Student','Semester'])
+#merge other non-LLAB student course records and majors
+cR_majors1 = pd.merge(others, majors, how='left', on=['Student','Semester'])
+cR_majors2 = cR_majors1[['Student','Semester','AdmissionStatus','Age','GroupClassification','NewReturning_Status','CourseLoad', 'Sex','AtRiskPopulation','Federal_FG','Minnesota_FG','PellScholar','BIPOC','RaceEth','MajorCode','DegreeCode','Major']].copy()
+cR_majors2.drop_duplicates(inplace=True, ignore_index=True)
+cR_majors = pd.merge(cR_majors2, others_gpa, how='left', on=['Student','Semester'])
+
+##ANALYSIS LOOP VERSION 1
+out = pd.DataFrame(columns=
+            ['Student','Name','Semester','GPA','SR','Credits','Load','Race','TotalAttendance','FrontHalf','BackHalf',
+            't1_GPA','t1_SR','t1_str','t1_count','t2_GPA','t2_SR','t2_str','t2_count',
+            't3_GPA','t3_SR','t3_str','t3_count','t4_GPA','t4_SR','t4_str','t4_count',
+            't5_GPA','t5_SR','t5_str','t5_count','t6_GPA','t6_SR','t6_str','t6_count',
+            't7_GPA','t7_SR','t7_str','t7_count','t8_GPA','t8_SR','t8_str','t8_count',
+            't9_GPA','t9_SR','t9_str','t9_count','t10_GPA','t10_SR','t10_str','t10_count'])
+listy2 = labbers[['Student','Semester']].drop_duplicates(keep='first').copy()
+listy2.reset_index(inplace=True,drop=True)
+t1,t2,t3,t4,t5,t6,t7,t8,t9,t10 = 0,0,0,0,0,0,0,0,0,0
+listy1 = pd.DataFrame(columns=['Student','Semester'])
+listy3 = LLcR_majors[['Student','Semester']].drop_duplicates(keep='first').copy()
+listy3.reset_index(inplace=True, drop=True)
+g=0
+for v in listy2.index:
+    tec = listy2.at[v,'Student']
+    tr = listy2.at[v,'Semester']
+    if len(listy3.loc[(listy3['Student']==tec) & (listy3['Semester']==tr),:]) != 0:
+        listy1_new = pd.DataFrame({'Student': tec,'Semester':tr}, index=[g])
+        listy1 = pd.concat([listy1,listy1_new])
+        g=g+1
+    else: continue
+n=0
+for i in listy1.index:
+    stu = listy1.at[i,'Student']
+    term = listy1.at[i,'Semester']
+    cR_majors_term = cR_majors.loc[cR_majors['Semester']==term,:].copy()
+    cR_majors_term.reset_index(drop=True,inplace=True)
+    #attach attendance data to LLAB students
+    attend = attendance.loc[(attendance['Student'] == stu) & (attendance['Semester'] == term),:].copy()
+    attend.reset_index(drop=True, inplace=True)
+    Name = attend.at[0,'Name']
+    TA = attend.at[0,'TotalAttendance']
+    FH = attend.at[0,'FrontHalf']
+    BH = attend.at[0,'BackHalf']
+    stu_df = LLcR_majors.loc[(LLcR_majors['Student'] == stu) & (LLcR_majors['Semester'] == term), :]
+    stu_df.reset_index(inplace=True, drop=True)
+
+    dem_df_f = stu_df[['AdmissionStatus','Age','GroupClassification','NewReturning_Status','CourseLoad',
+                    'Sex','AtRiskPopulation','Federal_FG','Minnesota_FG','PellScholar',
+                    'BIPOC','RaceEth','MajorCode','DegreeCode','Major',
+                    'GPA','Credits','SR']]
+    dem_df = dem_df_f.copy().drop_duplicates()
+
+    adm = dem_df.iloc[0,0]
+    ac = dem_df.iloc[0,1]
+    sc = dem_df.iloc[0,2]
+    ncs = dem_df.iloc[0,3]
+    sl = dem_df.iloc[0,4]
+    sg = dem_df.iloc[0,5]
+    ud = dem_df.iloc[0,6]
+    fgf = dem_df.iloc[0,7]
+    fgm = dem_df.iloc[0,8]
+    pr = dem_df.iloc[0,9]
+    soc = dem_df.iloc[0,10]
+    rre = dem_df.iloc[0,11]
+    mid = dem_df.iloc[0,12]
+    mdc = dem_df.iloc[0,13]
+    mn = dem_df.iloc[0,14]
+    GPA = dem_df.iloc[0,15]
+    STR = dem_df.iloc[0,16]
+    SR = dem_df.iloc[0,17]
+    #general demographics window; no first gen MN, no reporting race ethnicity, 
+    test1 = cR_majors_term.loc[
+        (cR_majors_term['AdmissionStatus']==adm) & (cR_majors_term['GroupClassification']==sc) & (cR_majors_term['CourseLoad']==sl)
+        ,['Student','GPA','SR','Credits']]
+    t1_list = [GPA - test1['GPA'].mean(),SR - test1['SR'].mean(),STR - test1['Credits'].mean(),test1['Student'].count()]
+    test2 = cR_majors_term.loc[
+        (cR_majors_term['AdmissionStatus']==adm) & (cR_majors_term['Age']==ac) & (cR_majors_term['GroupClassification']==sc) & (cR_majors_term['CourseLoad']==sl)
+        ,['Student','GPA','SR','Credits']]
+    t2_list = [GPA - test2['GPA'].mean(),SR - test2['SR'].mean(),STR - test2['Credits'].mean(),test2['Student'].count()]
+    test3 = cR_majors_term.loc[
+        (cR_majors_term['AdmissionStatus']==adm) & (cR_majors_term['CourseLoad']==sl) &
+        (cR_majors_term['Federal_FG']==fgf) & (cR_majors_term['PellScholar']==pr) & (cR_majors_term['BIPOC']==soc)
+        ,['Student','GPA','SR','Credits']]
+    t3_list = [GPA - test3['GPA'].mean(),SR - test3['SR'].mean(),STR - test3['Credits'].mean(),test3['Student'].count()]
+    test4 = cR_majors_term.loc[
+        (cR_majors_term['AdmissionStatus']==adm) & (cR_majors_term['Age']==ac) & (cR_majors_term['CourseLoad']==sl) &
+        (cR_majors_term['Federal_FG']==fgf) & (cR_majors_term['PellScholar']==pr) & (cR_majors_term['BIPOC']==soc)
+        ,['Student','GPA','SR','Credits']]
+    t4_list = [GPA - test4['GPA'].mean(),SR - test4['SR'].mean(),STR - test4['Credits'].mean(),test4['Student'].count()]
+    #narrow demographics window2
+    test5 = cR_majors_term.loc[
+        (cR_majors_term['AdmissionStatus']==adm) & (cR_majors_term['CourseLoad']==sl) &
+        (cR_majors_term['Sex']==sg) & (cR_majors_term['Federal_FG']==fgf) & (cR_majors_term['Minnesota_FG']==fgm) & 
+        (cR_majors_term['PellScholar']==pr) & (cR_majors_term['BIPOC']==soc)
+        ,['Student','GPA','SR','Credits']]
+    t5_list = [GPA - test5['GPA'].mean(),SR - test5['SR'].mean(),STR - test5['Credits'].mean(),test5['Student'].count()]
+    #narrow demographics window3
+    test6 = cR_majors_term.loc[
+        (cR_majors_term['AdmissionStatus']==adm) & (cR_majors_term['Age']==ac) & (cR_majors_term['GroupClassification']==sc) & (cR_majors_term['CourseLoad']==sl) &
+        (cR_majors_term['Federal_FG']==fgf) & (cR_majors_term['Minnesota_FG']==fgm) & (cR_majors_term['PellScholar']==pr) & (cR_majors_term['BIPOC']==soc)
+        ,['Student','GPA','SR','Credits']]
+    t6_list = [GPA - test6['GPA'].mean(),SR - test6['SR'].mean(),STR - test6['Credits'].mean(),test6['Student'].count()]
+    #narrow demographics window4
+    test7 = cR_majors_term.loc[
+        (cR_majors_term['AdmissionStatus']==adm) & (cR_majors_term['GroupClassification']==sc) & (cR_majors_term['CourseLoad']==sl) &
+        (cR_majors_term['Federal_FG']==fgf) & (cR_majors_term['Minnesota_FG']==fgm) & (cR_majors_term['PellScholar']==pr) & (cR_majors_term['RaceEth']==rre)
+        ,['Student','GPA','SR','Credits']]
+    t7_list = [GPA - test7['GPA'].mean(),SR - test7['SR'].mean(),STR - test7['Credits'].mean(),test7['Student'].count()]
+    #just others in their major
+    test8 = cR_majors_term.loc[ (cR_majors_term['MajorCode']==mid) & (cR_majors_term['DegreeCode']==mdc) & (cR_majors_term['Major']==mn),['Student','GPA','SR','Credits']]
+    t8_list = [GPA - test8['GPA'].mean(),SR - test8['SR'].mean(),STR - test8['Credits'].mean(),test8['Student'].count()]
+    #major and general demographics
+    test9 = cR_majors_term.loc[ (cR_majors_term['MajorCode']==mid) & (cR_majors_term['DegreeCode']==mdc) & (cR_majors_term['Major']==mn) &
+        (cR_majors_term['AdmissionStatus']==adm) & (cR_majors_term['GroupClassification']==sc) & (cR_majors_term['CourseLoad']==sl)
+        ,['Student','GPA','SR','Credits']]
+    t9_list = [GPA - test9['GPA'].mean(),SR - test9['SR'].mean(),STR - test9['Credits'].mean(),test9['Student'].count()]
+    #major and mid demographics
+    test10 = cR_majors_term.loc[ (cR_majors_term['MajorCode']==mid) & (cR_majors_term['DegreeCode']==mdc) & (cR_majors_term['Major']==mn) &
+        (cR_majors_term['AdmissionStatus']==adm) & (cR_majors_term['GroupClassification']==sc) & (cR_majors_term['CourseLoad']==sl) &
+        (cR_majors_term['Federal_FG']==fgf) & (cR_majors_term['PellScholar']==pr) & (cR_majors_term['BIPOC']==soc)
+        ,['Student','GPA','SR','Credits']]
+    t10_list = [GPA - test10['GPA'].mean(),SR - test10['SR'].mean(),STR - test10['Credits'].mean(),test10['Student'].count()]
+    #row for all of the student's test results
+    stu_pid = pd.DataFrame(
+                            {'Student':stu,'Name':Name,'Semester':term,'GPA':GPA,'SR':SR,'Credits':STR,'Load': sl,'Race':rre,'TotalAttendance':TA,'FrontHalf':FH,'BackHalf':BH,
+                            't1_GPA':t1_list[0],'t1_SR':t1_list[1],'t1_str':t1_list[2],'t1_count':t1_list[3],
+                            't2_GPA':t2_list[0],'t2_SR':t2_list[1],'t2_str':t2_list[2],'t2_count':t2_list[3],
+                            't3_GPA':t3_list[0],'t3_SR':t3_list[1],'t3_str':t3_list[2],'t3_count':t3_list[3],
+                            't4_GPA':t4_list[0],'t4_SR':t4_list[1],'t4_str':t4_list[2],'t4_count':t4_list[3],
+                            't5_GPA':t5_list[0],'t5_SR':t5_list[1],'t5_str':t5_list[2],'t5_count':t5_list[3],
+                            't6_GPA':t6_list[0],'t6_SR':t6_list[1],'t6_str':t6_list[2],'t6_count':t6_list[3],
+                            't7_GPA':t7_list[0],'t7_SR':t7_list[1],'t7_str':t7_list[2],'t7_count':t7_list[3],
+                            't8_GPA':t8_list[0],'t8_SR':t8_list[1],'t8_str':t8_list[2],'t8_count':t8_list[3],
+                            't9_GPA':t9_list[0],'t9_SR':t9_list[1],'t9_str':t9_list[2],'t9_count':t9_list[3],
+                            't10_GPA':t10_list[0],'t10_SR':t10_list[1],'t10_str':t10_list[2],'t10_count':t10_list[3]}, index=[n])
+    n=n+1
+    out = pd.concat([out,stu_pid])
+
+```
+ANALYSIS LOOP VERSION 2
+- instead of the outputs being the difference, the outputs are the mean success and gpa of the students in the comparison groups
+    - additionally, NaNs are replaced with the LLAB comparison student's scores to stop any ttests from not running
+- this can be used for your ttests
+```
+out2 = pd.DataFrame(columns=
+            ['Student','Name','Semester','GPA','SR','Credits','Load','Race','TotalAttendance','FrontHalf','BackHalf',
+            't1_GPA','t1_SR','t1_str','t1_count','t2_GPA','t2_SR','t2_str','t2_count',
+            't3_GPA','t3_SR','t3_str','t3_count','t4_GPA','t4_SR','t4_str','t4_count',
+            't5_GPA','t5_SR','t5_str','t5_count','t6_GPA','t6_SR','t6_str','t6_count',
+            't7_GPA','t7_SR','t7_str','t7_count','t8_GPA','t8_SR','t8_str','t8_count',
+            't9_GPA','t9_SR','t9_str','t9_count','t10_GPA','t10_SR','t10_str','t10_count'])
+listy2 = labbers[['Student','Semester']].drop_duplicates(keep='first').copy()
+listy2.reset_index(inplace=True,drop=True)
+t1,t2,t3,t4,t5,t6,t7,t8,t9,t10 = 0,0,0,0,0,0,0,0,0,0
+listy1 = pd.DataFrame(columns=['Student','Semester'])
+listy3 = LLcR_majors[['Student','Semester']].drop_duplicates(keep='first').copy()
+listy3.reset_index(inplace=True, drop=True)
+g=0
+for v in listy2.index:
+    tec = listy2.at[v,'Student']
+    tr = listy2.at[v,'Semester']
+    if len(listy3.loc[(listy3['Student']==tec) & (listy3['Semester']==tr),:]) != 0:
+        listy1_new = pd.DataFrame({'Student': tec,'Semester':tr}, index=[g])
+        listy1 = pd.concat([listy1,listy1_new])
+        g=g+1
+    else: continue
+n=0
+for i in listy1.index:
+    stu = listy1.at[i,'Student']
+    term = listy1.at[i,'Semester']
+    cR_majors_term = cR_majors.loc[cR_majors['Semester']==term,:].copy()
+    cR_majors_term.reset_index(drop=True,inplace=True)
+    #attach attendance data to LLAB students
+    attend = attendance.loc[(attendance['Student'] == stu) & (attendance['Semester'] == term),:].copy()
+    attend.reset_index(drop=True, inplace=True)
+    Name = attend.at[0,'Name']
+    TA = attend.at[0,'TotalAttendance']
+    FH = attend.at[0,'FrontHalf']
+    BH = attend.at[0,'BackHalf']
+    stu_df = LLcR_majors.loc[(LLcR_majors['Student'] == stu) & (LLcR_majors['Semester'] == term), :]
+    stu_df.reset_index(inplace=True, drop=True)
+
+    dem_df_f = stu_df[['AdmissionStatus','Age','GroupClassification','NewReturning_Status','CourseLoad',
+                    'Sex','AtRiskPopulation','Federal_FG','Minnesota_FG','PellScholar',
+                    'BIPOC','RaceEth','MajorCode','DegreeCode','Major',
+                    'GPA','Credits','SR']]
+    dem_df = dem_df_f.copy().drop_duplicates()
+
+    adm = dem_df.iloc[0,0]
+    ac = dem_df.iloc[0,1]
+    sc = dem_df.iloc[0,2]
+    ncs = dem_df.iloc[0,3]
+    sl = dem_df.iloc[0,4]
+    sg = dem_df.iloc[0,5]
+    ud = dem_df.iloc[0,6]
+    fgf = dem_df.iloc[0,7]
+    fgm = dem_df.iloc[0,8]
+    pr = dem_df.iloc[0,9]
+    soc = dem_df.iloc[0,10]
+    rre = dem_df.iloc[0,11]
+    mid = dem_df.iloc[0,12]
+    mdc = dem_df.iloc[0,13]
+    mn = dem_df.iloc[0,14]
+    GPA = dem_df.iloc[0,15]
+    STR = dem_df.iloc[0,16]
+    SR = dem_df.iloc[0,17]
+    #general demographics window; no first gen MN, no reporting race ethnicity, 
+    test1 = cR_majors_term.loc[
+        (cR_majors_term['AdmissionStatus']==adm) & (cR_majors_term['GroupClassification']==sc) & (cR_majors_term['CourseLoad']==sl)
+        ,['Student','GPA','SR','Credits']]
+    t1_list = [test1['GPA'].mean(),test1['SR'].mean(),test1['Credits'].mean(),test1['Student'].count()]
+    test2 = cR_majors_term.loc[
+        (cR_majors_term['AdmissionStatus']==adm) & (cR_majors_term['Age']==ac) & (cR_majors_term['GroupClassification']==sc) & (cR_majors_term['CourseLoad']==sl)
+        ,['Student','GPA','SR','Credits']]
+    t2_list = [test2['GPA'].mean(),test2['SR'].mean(),test2['Credits'].mean(),test2['Student'].count()]
+    test3 = cR_majors_term.loc[
+        (cR_majors_term['AdmissionStatus']==adm) & (cR_majors_term['CourseLoad']==sl) &
+        (cR_majors_term['Federal_FG']==fgf) & (cR_majors_term['PellScholar']==pr) & (cR_majors_term['BIPOC']==soc)
+        ,['Student','GPA','SR','Credits']]
+    t3_list = [test3['GPA'].mean(),test3['SR'].mean(),test3['Credits'].mean(),test3['Student'].count()]
+    test4 = cR_majors_term.loc[
+        (cR_majors_term['AdmissionStatus']==adm) & (cR_majors_term['Age']==ac) & (cR_majors_term['CourseLoad']==sl) &
+        (cR_majors_term['Federal_FG']==fgf) & (cR_majors_term['PellScholar']==pr) & (cR_majors_term['BIPOC']==soc)
+        ,['Student','GPA','SR','Credits']]
+    t4_list = [test4['GPA'].mean(),test4['SR'].mean(),test4['Credits'].mean(),test4['Student'].count()]
+    #narrow demographics window2
+    test5 = cR_majors_term.loc[
+        (cR_majors_term['AdmissionStatus']==adm) & (cR_majors_term['CourseLoad']==sl) &
+        (cR_majors_term['Sex']==sg) & (cR_majors_term['Federal_FG']==fgf) & (cR_majors_term['Minnesota_FG']==fgm) & 
+        (cR_majors_term['PellScholar']==pr) & (cR_majors_term['BIPOC']==soc)
+        ,['Student','GPA','SR','Credits']]
+    t5_list = [test5['GPA'].mean(),test5['SR'].mean(),test5['Credits'].mean(),test5['Student'].count()]
+    #narrow demographics window3
+    test6 = cR_majors_term.loc[
+        (cR_majors_term['AdmissionStatus']==adm) & (cR_majors_term['Age']==ac) & (cR_majors_term['GroupClassification']==sc) & (cR_majors_term['CourseLoad']==sl) &
+        (cR_majors_term['Federal_FG']==fgf) & (cR_majors_term['Minnesota_FG']==fgm) & (cR_majors_term['PellScholar']==pr) & (cR_majors_term['BIPOC']==soc)
+        ,['Student','GPA','SR','Credits']]
+    t6_list = [test6['GPA'].mean(),test6['SR'].mean(),test6['Credits'].mean(),test6['Student'].count()]
+    #narrow demographics window4
+    test7 = cR_majors_term.loc[
+        (cR_majors_term['AdmissionStatus']==adm) & (cR_majors_term['GroupClassification']==sc) & (cR_majors_term['CourseLoad']==sl) &
+        (cR_majors_term['Federal_FG']==fgf) & (cR_majors_term['Minnesota_FG']==fgm) & (cR_majors_term['PellScholar']==pr) & (cR_majors_term['RaceEth']==rre)
+        ,['Student','GPA','SR','Credits']]
+    t7_list = [test7['GPA'].mean(),test7['SR'].mean(),test7['Credits'].mean(),test7['Student'].count()]
+    #just others in their major
+    test8 = cR_majors_term.loc[ (cR_majors_term['MajorCode']==mid) & (cR_majors_term['DegreeCode']==mdc) & (cR_majors_term['Major']==mn),['Student','GPA','SR','Credits']]
+    t8_list = [test8['GPA'].mean(),test8['SR'].mean(),test8['Credits'].mean(),test8['Student'].count()]
+    #major and general demographics
+    test9 = cR_majors_term.loc[ (cR_majors_term['MajorCode']==mid) & (cR_majors_term['DegreeCode']==mdc) & (cR_majors_term['Major']==mn) &
+        (cR_majors_term['AdmissionStatus']==adm) & (cR_majors_term['GroupClassification']==sc) & (cR_majors_term['CourseLoad']==sl)
+        ,['Student','GPA','SR','Credits']]
+    t9_list = [test9['GPA'].mean(),test9['SR'].mean(),test9['Credits'].mean(),test9['Student'].count()]
+    #major and mid demographics
+    test10 = cR_majors_term.loc[ (cR_majors_term['MajorCode']==mid) & (cR_majors_term['DegreeCode']==mdc) & (cR_majors_term['Major']==mn) &
+        (cR_majors_term['AdmissionStatus']==adm) & (cR_majors_term['GroupClassification']==sc) & (cR_majors_term['CourseLoad']==sl) &
+        (cR_majors_term['Federal_FG']==fgf) & (cR_majors_term['PellScholar']==pr) & (cR_majors_term['BIPOC']==soc)
+        ,['Student','GPA','SR','Credits']]
+    t10_list = [test10['GPA'].mean(),test10['SR'].mean(),test10['Credits'].mean(),test10['Student'].count()]
+    #find any calculations that were NA due to a size-zero comparison group and replace them with the score from the LLAB student being compared
+    t_list = [t1_list,t2_list,t3_list,t4_list,t5_list,t6_list,t7_list,t8_list,t9_list,t10_list]
+    for t in t_list:
+        if t[3] == 0:
+            t[0] = GPA
+            t[1] = SR
+            t[2] = STR
+    #row for all of the student's test results
+    stu_pid = pd.DataFrame(
+                            {'Student':stu,'Name':Name,'Semester':term,'GPA':GPA,'SR':SR,'Credits':STR,'Load': sl,'Race':rre,'TotalAttendance':TA,'FrontHalf':FH,'BackHalf':BH,
+                            't1_GPA':t1_list[0],'t1_SR':t1_list[1],'t1_str':t1_list[2],'t1_count':t1_list[3],
+                            't2_GPA':t2_list[0],'t2_SR':t2_list[1],'t2_str':t2_list[2],'t2_count':t2_list[3],
+                            't3_GPA':t3_list[0],'t3_SR':t3_list[1],'t3_str':t3_list[2],'t3_count':t3_list[3],
+                            't4_GPA':t4_list[0],'t4_SR':t4_list[1],'t4_str':t4_list[2],'t4_count':t4_list[3],
+                            't5_GPA':t5_list[0],'t5_SR':t5_list[1],'t5_str':t5_list[2],'t5_count':t5_list[3],
+                            't6_GPA':t6_list[0],'t6_SR':t6_list[1],'t6_str':t6_list[2],'t6_count':t6_list[3],
+                            't7_GPA':t7_list[0],'t7_SR':t7_list[1],'t7_str':t7_list[2],'t7_count':t7_list[3],
+                            't8_GPA':t8_list[0],'t8_SR':t8_list[1],'t8_str':t8_list[2],'t8_count':t8_list[3],
+                            't9_GPA':t9_list[0],'t9_SR':t9_list[1],'t9_str':t9_list[2],'t9_count':t9_list[3],
+                            't10_GPA':t10_list[0],'t10_SR':t10_list[1],'t10_str':t10_list[2],'t10_count':t10_list[3]}, index=[n])
+    n=n+1
+    out2 = pd.concat([out2,stu_pid])
+
+##SUBSETTING OUTPUTS BASED ON SAMPLE VALIDITY
+#subgrouping out individuals based on attendance
+#attendance = 0
+out3 = out2.loc[out2['TotalAttendance'] > 0,:]
+#attendance < 5
+out4 = out2.loc[out2['TotalAttendance'] > 4,:]
+#attendance < 7
+out5 = out2.loc[out2['TotalAttendance'] > 6,:]
+
+##TEST ANALYSIS LOOP VERSION 2 TEST GROUP RESULTS AGAINST EVERY SET OF INDIVIDUALIZED COMPARISON GROUPS
+ttest(out2,'SR')
+ttest(out2,'GPA')
+
+#OUTPUT RESULTS FROM ANALYSIS LOOP VERSION 1 FOR FURTHER INSPECTION IN R AND EXCEL
+out.to_csv('tests.csv',index=False)
+
+##Aspect currently left out of analysis
+##separate the Learning Lab drops from the persists
+pers = registrations.loc[(registrations['DropStampTime'].isna() == True) & (registrations['LetterGrade'].isna() == True),:]
+drops = registrations.loc[(registrations['DropStampTime'].isna() == False) | (registrations['LetterGrade'].isna() == False),:]
