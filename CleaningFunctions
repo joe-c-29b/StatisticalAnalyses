@@ -15,6 +15,16 @@ names <- c("Term","Term","Term")
 c(colnames(df)[1],colnames(df2)[1],colnames(df3)[1]) %<-% names[c(1,2,3)]
 ```
 
+# merge two data frames by ID
+```{r}
+total <- merge(data frameA,data frameB,by="ID")
+```
+
+# merge two data frames by ID and Country
+```{r}
+total <- merge(data frameA,data frameB,by=c("ID","Country"))
+```
+
 ##how to merge more than 2 dataframes together
 ```{r}
 library(tidyverse)
