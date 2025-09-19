@@ -69,6 +69,15 @@ https://www.sthda.com/english/wiki/ggplot2-point-shapes
 ##rotating axis labels
 + theme(axis.text.x = element_text(angle = 60, hjust = 1))
 
+##adding a second axis graph
++ geom_line(aes(y=y1))
++ geom_line(aes(y=y2 */-+ functionInverse)) #use the same function, but invert the method ie * instead of / or + instead of -
++ scale_y_continuous(name="y1 Name", sec.axis=sec_axis(~.function, name="y2 Name", breaks=y2Breaks, labels=y2Labels)) 
+	#~.function is mandatory; you are basically extrapolating the y2 axis from the y1 axis
+	#breaks and labels are optional
+	#change theme elements on second axis
+	+ theme(axis.text.y.right = element_text(color='red'), axis.title.y.right = element_text(color='red', face='bold'))
+
 ##changing tick mark labels
 + scale_y_continuous(limits=c(0,100), breaks=c(25,50,75,100), labels=c("25%","50%","75%","100%"))
 
@@ -135,8 +144,13 @@ https://www.sthda.com/english/wiki/ggplot2-point-shapes
 ggplot(data, aes(x= , y= , color=as.factor( `grouping column` ))) +
   geom_line(stat="identity")
 
+##making an alluvium diagram
+ggplot(df4, aes(x = , stratum = Action, alluvium = Freq, fill = Action, label=Action)) + #Freq: you are identifying the column that is going to be "counted" like a User_id or patient #
+  geom_flow(stat = "alluvium", lode.guidance='rightleft', aes(color=Action)) + #this is responsible for mapping the connections between your buckets from one X to the next ie "new student in FY25" to "returning student in FY26"
+  geom_stratum() #this creates your rectangular "buckets" at each node ie "new students", "returning student", "departed student"
+
 	##functions used: +theme(), +labs(), +scale_fill_manual(), +scale_x_continuous(), +scale_y_continuous(), geom_bar(), geom_chicklet(), geom_smooth(), scale_y_reverse(), scale_x_reverse(), ggtitle(), geom_line(), factor(),
-		+geom_text(), +geom_annotate(), position_dodge(), +guides(), +scale_linewidth(), +annotate(), +guide_legend()
+		+geom_text(), +geom_annotate(), position_dodge(), +guides(), +scale_linewidth(), +annotate(), +guide_legend(), sec_axis(), +geom_flow(), +geom_stratum()
 	##concepts involved:
 		## adding a title
 		## removing legend
@@ -163,4 +177,6 @@ ggplot(data, aes(x= , y= , color=as.factor( `grouping column` ))) +
 		## linetypes
 		## removing a specific legend
 		## adjusting aesthetics of the legend icons
-		##changeing the overall size of the graph's visual output
+		## changeing the overall size of the graph's visual output
+		## adding a second axis graph
+		## making an alluvium diagram
