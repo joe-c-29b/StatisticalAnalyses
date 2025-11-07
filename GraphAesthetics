@@ -114,6 +114,8 @@ https://www.sthda.com/english/wiki/ggplot2-point-shapes
 	+ geom_text(aes(fontface=2))
 	# change font
 	+ geom_text(family="Times New Roman")
+	# change angle
+	+ geom_text(aes(angle=90))
 + annotate()
 	# manually placing a point on a graph
 	+ annotate(geom="point", x=, y=, size=, color='')
@@ -139,6 +141,30 @@ https://www.sthda.com/english/wiki/ggplot2-point-shapes
 ##preventing bars from expanding to cover zero or null values at that x-value
 ##fixing bar width
 + geom_bar(stat='identity', position=position_dodge(preserve = 'single'), aes(fill=))
+
+##bar graph fill pattern - https://cran.r-project.org/web/packages/ggpattern/vignettes/patterns-stripes.html
+library(ggpattern) 
++ geom_col_pattern(aes(
+	pattern=, 
+	#pattern options
+	('stripe','wave','weave','crosshatch','circle')
+	patter_fill=, 
+	pattern_colour=, 
+	pattern_angle=, 
+	pattern_density=, 
+	pattern_spacing=, 
+	pattern_xoffset=, 
+	pattern_yoffset, 
+	pattern_units=, 
+	pattern_alpha=, 
+	pattern_linetype=, 
+	pattern_size=, 
+	pattern_subtype=, 
+	pattern_frequency=
+)
+	
+##adjusting bar graph outline
++ geom_bar(linewidth=1)
 
 ##making multiple line graph
 ggplot(data, aes(x= , y= , color=as.factor( `grouping column` ))) +
