@@ -54,6 +54,9 @@ https://www.sthda.com/english/wiki/ggplot2-point-shapes
 ##change colors
 + scale_fill_manual(values=c())
 
+##change opacity (change alpha level)
++ scale_alpha_manual(values = c("4" = 0.3, "6" = 0.6, "8" = 1.0))
+
 ##change linewidth scale
 + scale_linewidth(name=element_blank() or '', range=c(1.25,2))
 
@@ -176,7 +179,7 @@ ggplot(df4, aes(x = , stratum = Action, alluvium = Freq, fill = Action, label=Ac
   geom_stratum() #this creates your rectangular "buckets" at each node ie "new students", "returning student", "departed student"
 
 	##functions used: +theme(), +labs(), +scale_fill_manual(), +scale_x_continuous(), +scale_y_continuous(), geom_bar(), geom_chicklet(), geom_smooth(), scale_y_reverse(), scale_x_reverse(), ggtitle(), geom_line(), factor(),
-		+geom_text(), +geom_annotate(), position_dodge(), +guides(), +scale_linewidth(), +annotate(), +guide_legend(), sec_axis(), +geom_flow(), +geom_stratum()
+		+geom_text(), +geom_annotate(), position_dodge(), +guides(), +scale_linewidth(), +annotate(), +guide_legend(), sec_axis(), +geom_flow(), +geom_stratum(), +scale_alpha_manual()
 	##concepts involved:
 		## adding a title
 		## removing legend
@@ -206,3 +209,4 @@ ggplot(df4, aes(x = , stratum = Action, alluvium = Freq, fill = Action, label=Ac
 		## changeing the overall size of the graph's visual output
 		## adding a second axis graph
 		## making an alluvium diagram
+		## change opacity (change alpha level)
