@@ -174,13 +174,16 @@ library(ggpattern)
 ggplot(data, aes(x= , y= , color=as.factor( `grouping column` ))) +
   geom_line(stat="identity")
 
+##making multiple variation graphs using a categorical variable aka facet_wrap
++ facet_wrap(~ variable)
+
 ##making an alluvium diagram
 ggplot(df4, aes(x = , stratum = Action, alluvium = Freq, fill = Action, label=Action)) + #Freq: you are identifying the column that is going to be "counted" like a User_id or patient #
   geom_flow(stat = "alluvium", lode.guidance='rightleft', aes(color=Action)) + #this is responsible for mapping the connections between your buckets from one X to the next ie "new student in FY25" to "returning student in FY26"
   geom_stratum() #this creates your rectangular "buckets" at each node ie "new students", "returning student", "departed student"
 
 	##functions used: +theme(), +labs(), +scale_fill_manual(), +scale_x_continuous(), +scale_y_continuous(), geom_bar(), geom_chicklet(), geom_smooth(), scale_y_reverse(), scale_x_reverse(), ggtitle(), geom_line(), factor(),
-		+geom_text(), +geom_annotate(), position_dodge(), +guides(), +scale_linewidth(), +annotate(), +guide_legend(), sec_axis(), +geom_flow(), +geom_stratum(), +scale_alpha_manual(), +scale_alpha_identity()
+		+geom_text(), +geom_annotate(), position_dodge(), +guides(), +scale_linewidth(), +annotate(), +guide_legend(), sec_axis(), +geom_flow(), +geom_stratum(), +scale_alpha_manual(), +scale_alpha_identity(), +facet_wrap()
 	##concepts involved:
 		## adding a title
 		## removing legend
@@ -211,3 +214,4 @@ ggplot(df4, aes(x = , stratum = Action, alluvium = Freq, fill = Action, label=Ac
 		## adding a second axis graph
 		## making an alluvium diagram
 		## change opacity (change alpha level)
+		## making multiple variation graphs using a categorical variable aka facet_wrap
