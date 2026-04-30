@@ -40,3 +40,8 @@ df_out -> bind_rows(DF1, DF2, DF3)
   #or
 df_out -> bind_rows(DF1, DF2, DF3)
 ```
+
+##how to create a column using an ifelse statement
+```{r}
+  %>% mutate(NewColumn = ifelse(Column1>Column2,"Improved", "Devolved"))
+```
