@@ -19,6 +19,11 @@
 ##changing legend title
 + labs(fill="legend title")  #fill/color or whatever aspect the current legend is for  #basically, whatever you are using as your 3rd element, fill= or color=, that your legend is going to be describing
 
+##changing legend position
++ theme(legend.position="right/left/top/bottom/inside") 
+	##placing legend inside plot area
+	+ theme(legend.position="inside", legend.position.inside=c(X,Y)) # c(0,0) equates to bottom left of plot picture; c(1,1) equates to top right of plot picture; all coordinates must be between 0 & 1 
+
 ##managing multiple legends
 + guides(color='', size='', linewidth='', fill='')
 	##removing a specific legend
@@ -215,3 +220,5 @@ ggplot(df4, aes(x = , stratum = Action, alluvium = Freq, fill = Action, label=Ac
 		## making an alluvium diagram
 		## change opacity (change alpha level)
 		## making multiple variation graphs using a categorical variable aka facet_wrap
+		## changing legend position
+		## placing legend inside plot area
