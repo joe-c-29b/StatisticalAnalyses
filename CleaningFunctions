@@ -45,3 +45,18 @@ df_out -> bind_rows(DF1, DF2, DF3)
 ```{r}
   %>% mutate(NewColumn = ifelse(Column1>Column2,"Improved", "Devolved"))
 ```
+
+##how to check if 2 dataframes have the same columns
+```{r}
+identical(names(df1), names(df2))
+```
+
+##how to figure out which column headers don't match
+```{r}
+df <- data.frame(
+  df1 = names(k12_18),
+  df2 = names(k12_19))
+for (row in seq_len(nrow(df))) {
+  if (df[row,1]==df[row,2]) {print("TRUE")} else {print(paste(df[row,1],"FALSE",df[row,2]))}
+}
+```
