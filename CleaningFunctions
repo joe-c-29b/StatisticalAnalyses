@@ -15,6 +15,19 @@ names <- c("Term","Term","Term")
 c(colnames(df)[1],colnames(df2)[1],colnames(df3)[1]) %<-% names[c(1,2,3)]
 ```
 
+## drop duplicates from a dataframe
+  # Drop rows that are completely identical across all columns
+  df_clean <- df %>% distinct()
+
+  # Drop duplicates based on ONE column (keeps the first occurrence)
+  # NOTE: .keep_all = TRUE ensures you don't lose the other columns
+  df_clean <- df %>% distinct(column_name, .keep_all = TRUE)
+
+  # Drop duplicates based on MULTIPLE specific columns
+  df_clean <- df %>% distinct(col1, col2, .keep_all = TRUE)
+
+
+
 # merge two data frames by ID
 ```{r}
 total <- merge(data frameA,data frameB,by="ID")
@@ -24,6 +37,11 @@ total <- merge(data frameA,data frameB,by="ID")
 ```{r}
 total <- merge(data frameA,data frameB,by=c("ID","Country"))
 ```
+
+# Merge two data frames on multiple columns with different names
+merged_df <- merge(df1, df2, 
+                   by.x = c("ID", "Country"), 
+                   by.y = c("Seq", "Locale"))
 
 ##how to merge more than 2 dataframes together
 ```{r}
