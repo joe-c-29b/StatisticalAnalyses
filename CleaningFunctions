@@ -63,6 +63,16 @@ df_out -> bind_rows(DF1, DF2, DF3)
 ```{r}
   %>% mutate(NewColumn = ifelse(Column1>Column2,"Improved", "Devolved"))
 ```
+##how to create a column using a case_when statement
+```{r}
+df %>%
+  mutate(
+    new_column = case_when(
+      condition1 ~ "Value for condition 1",
+      condition2 ~ "Value for condition 2",
+      TRUE ~ "Default / Else value" # Catch-all for everything else
+    ) )
+```
 
 ##how to check if 2 dataframes have the same columns
 ```{r}
